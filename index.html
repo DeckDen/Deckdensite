@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DeckDen</title>
+  <!-- Font Awesome for account & menu icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     /* Global box sizing */
     * {
@@ -14,14 +16,14 @@
     :root {
       --bg-color: #ffffff;
       --text-color: #222222;
-      --accent-color: #ff6600; /* Orange */
+      --accent-color: #cc5200; /* Darker orange */
     }
 
     /* Dark Mode Theme */
     .dark-mode {
       --bg-color: #121212;
       --text-color: #f1f1f1;
-      --accent-color: #ff6600; /* Orange stays the same */
+      --accent-color: #cc5200; /* Darker orange stays the same */
     }
 
     body {
@@ -31,7 +33,7 @@
       margin: 0;
       padding: 0;
       transition: background-color 0.3s, color 0.3s;
-      overflow-x: hidden; /* prevent horizontal scroll */
+      overflow-x: hidden;
     }
 
     /* Navbar */
@@ -42,10 +44,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 20px; /* narrower */
-      position: sticky; /* stays visible */
+      padding: 8px 20px;
+      position: sticky;
       top: 0;
-      z-index: 1000; /* stays above content */
+      z-index: 1000;
     }
 
     /* Left section (logo + nav links) */
@@ -61,6 +63,10 @@
       cursor: pointer;
     }
 
+    .nav-links {
+      display: flex;
+    }
+
     .nav-links a {
       color: white;
       text-decoration: none;
@@ -74,15 +80,14 @@
       opacity: 0.8;
     }
 
-    /* Right section (search + account + dark mode) */
+    /* Right section (search + account + dark mode + menu toggle) */
     .nav-right {
       display: flex;
       align-items: center;
-      flex-shrink: 1; /* prevent pushing layout too wide */
     }
 
     .nav-right input[type="text"] {
-      width: 160px; /* fixed width */
+      width: 160px;
       max-width: 100%;
       padding: 5px 10px;
       border-radius: 4px;
@@ -106,11 +111,33 @@
       background-color: #f2f2f2;
     }
 
-    .nav-right img {
-      width: 28px;
-      height: 28px;
+    .nav-right i {
+      color: white;
+      font-size: 1.2rem;
       margin-left: 12px;
       cursor: pointer;
+    }
+
+    /* Hamburger menu for mobile */
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      color: white;
+      cursor: pointer;
+      margin-left: 15px;
+    }
+
+    /* Mobile dropdown menu */
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      background: var(--accent-color);
+      padding: 10px 20px;
+    }
+
+    .mobile-menu a,
+    .mobile-menu input {
+      margin: 8px 0;
     }
 
     /* Content area */
@@ -138,6 +165,20 @@
       height: 120px;
       margin-bottom: 15px;
     }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .nav-links,
+      .nav-right input[type="text"] {
+        display: none; /* hide desktop links & search */
+      }
+      .menu-toggle {
+        display: block; /* show hamburger */
+      }
+      .mobile-menu.show {
+        display: flex; /* show dropdown on click */
+      }
+    }
   </style>
 </head>
 <body>
@@ -154,14 +195,22 @@
 
     <div class="nav-right">
       <input type="text" placeholder="Search...">
-      <img src="account-icon.png" alt="Account">
+      <i class="fas fa-user" title="Account"></i>
       <button onclick="toggleDarkMode()">🌙</button>
+      <i class="fas fa-bars menu-toggle" onclick="toggleMenu()"></i>
     </div>
   </nav>
 
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#">Magic Sets</a>
+    <a href="#">Cart</a>
+    <a href="#">About Us</a>
+    <input type="text" placeholder="Search...">
+  </div>
+
   <!-- Main Content -->
   <div class="content">
-    <!-- Replace src with your business icon file -->
     <img src="Deckden Transparent.png" alt="DeckDen Logo" class="logo">
     <h1>DeckDen</h1>
     <p>Your home for Magic: The Gathering singles, decks, and more.</p>
@@ -171,6 +220,11 @@
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
     }
+
+    function toggleMenu() {
+      document.getElementById('mobileMenu').classList.toggle('show');
+    }
   </script>
 </body>
 </html>
+
