@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeckDen</title>
+  <style>
+    /* Global box sizing */
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Default Light Theme */
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #222222;
+      --accent-color: #ff6600; /* Orange */
+    }
+
+    /* Dark Mode Theme */
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #f1f1f1;
+      --accent-color: #ff6600; /* Orange stays the same */
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+      overflow-x: hidden; /* prevent horizontal scroll */
+    }
+
+    /* Navbar */
+    nav {
+      width: 100%;
+      max-width: 100%;
+      background: var(--accent-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 20px; /* narrower */
+    }
+
+    /* Left section (logo + nav links) */
+    .nav-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-left img {
+      width: 36px;
+      height: 36px;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover {
+      opacity: 0.8;
+    }
+
+    /* Right section (search + account + dark mode) */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      flex-shrink: 1; /* prevent pushing layout too wide */
+    }
+
+    .nav-right input[type="text"] {
+      width: 160px; /* fixed width */
+      max-width: 100%;
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: none;
+      margin-right: 12px;
+    }
+
+    .nav-right button {
+      margin-left: 8px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: white;
+      color: var(--accent-color);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.3s;
+    }
+
+    .nav-right button:hover {
+      background-color: #f2f2f2;
+    }
+
+    .nav-right img {
+      width: 28px;
+      height: 28px;
+      margin-left: 12px;
+      cursor: pointer;
+    }
+
+    /* Content area */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    h1 {
+      color: var(--accent-color);
+      font-size: 3rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+      max-width: 600px;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav>
+    <div class="nav-left">
+      <a href="index.html"><img src="Deckden Transparent.png" alt="Home"></a>
+      <div class="nav-links">
+        <a href="#">Magic Sets</a>
+        <a href="#">Cart</a>
+        <a href="#">About Us</a>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <input type="text" placeholder="Search...">
+      <img src="account-icon.png" alt="Account">
+      <button onclick="toggleDarkMode()">🌙</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="content">
+    <!-- Replace src with your business icon file -->
+    <img src="Deckden Transparent.png" alt="DeckDen Logo" class="logo">
+    <h1>DeckDen</h1>
+    <p>Your home for Magic: The Gathering singles, decks, and more.</p>
+  </div>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
