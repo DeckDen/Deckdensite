@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set - DeckDen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{box-sizing:border-box;}
+    :root{--bg-color:#fff;--text-color:#222;--accent-color:#cc5200;}
+    .dark-mode{--bg-color:#121212;--text-color:#f1f1f1;--accent-color:#cc5200;}
+    body{font-family:Arial,sans-serif;background:var(--bg-color);color:var(--text-color);margin:0;transition:.3s;}
+    nav{width:100%;background:var(--accent-color);display:flex;justify-content:space-between;align-items:center;padding:8px 20px;position:sticky;top:0;z-index:1000;}
+    .nav-left{display:flex;align-items:center;} .nav-left img{width:36px;height:36px;margin-right:12px;cursor:pointer;}
+    .nav-links{display:flex;} .nav-links a{color:#fff;text-decoration:none;margin:0 12px;font-weight:bold;font-size:.95rem;transition:opacity .3s;} .nav-links a:hover{opacity:.8;}
+    .nav-right{display:flex;align-items:center;} .nav-right input{width:160px;padding:5px 10px;border-radius:4px;border:none;margin-right:12px;}
+    .nav-right button{margin-left:8px;padding:5px 10px;border:none;border-radius:6px;background:#fff;color:var(--accent-color);cursor:pointer;font-size:.85rem;transition:.3s;} .nav-right button:hover{background:#f2f2f2;}
+    .nav-right i{color:#fff;font-size:1.2rem;margin-left:12px;cursor:pointer;}
+    .menu-toggle{display:none;font-size:1.5rem;color:#fff;cursor:pointer;margin-left:15px;}
+    .mobile-menu{display:none;flex-direction:column;background:var(--accent-color);padding:10px 20px;}
+    .mobile-menu a,.mobile-menu input{margin:8px 0;}
+    .content{max-width:1100px;margin:auto;padding:40px 20px;}
+    h1{text-align:center;color:var(--accent-color);}
+    #cards-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;margin-top:20px;}
+    .card{border:2px solid var(--accent-color);border-radius:8px;padding:10px;text-align:center;background:var(--bg-color);transition:.3s;}
+    .card img{width:100%;max-width:200px;border-radius:6px;}
+    .price{font-weight:bold;margin:5px 0;}
+    .stock{font-size:.9rem;margin:5px 0;}
+    input[type=number]{width:60px;text-align:center;margin:5px;}
+    button.buy{background:var(--accent-color);color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;}
+    button.buy:hover{background:#a63f00;}
+    @media(max-width:768px){.nav-links,.nav-right input{display:none;} .menu-toggle{display:block;} .mobile-menu.show{display:flex;}}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <a href="index.html"><img src="Deckden Transparent.png" alt="Home"></a>
+      <div class="nav-links">
+        <a href="magic-sets.html">Magic Sets</a>
+        <a href="#">Cart</a>
+        <a href="#">About Us</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <input type="text" placeholder="Search...">
+      <i class="fas fa-user"></i>
+      <button onclick="toggleDarkMode()">🌙</button>
+      <i class="fas fa-bars menu-toggle" onclick="toggleMenu()"></i>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="magic-sets.html">Magic Sets</a>
+    <a href="#">Cart</a>
+    <a href="#">About Us</a>
+    <input type="text" placeholder="Search...">
+  </div>
+
+  <div class="content">
+    <h1 id="set-title">Loading...</h1>
+    <div id="cards-container">Loading cards...</div>
+  </div>
+
+  <script>
+    function toggleDarkMode(){document.body.classList.toggle('dark-mode');}
+    function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('show');}
+
+    async function loadSet(){
+      const params=new URLSearchParams(window.location.search);
+      const setCode=params.get("code");
+      const setName=params.get("name")||setCode;
+      document.getElementById("set-title").textContent=setName;
+
+      // 1. Fetch Scryfall cards
+      const response=await fetch(`https://api.scryfall.com/cards/search?q=set:${setCode}`);
+      const scryData=await response.json();
+
+      // 2. Fetch Google Sheet data (replace with your JSON API URL)
+      const sheetURL="YOUR_GOOGLE_SHEET_JSON_URL";
+      const sheetRes=await fetch(sheetURL);
+      const sheetData=await sheetRes.json();
+
+      const container=document.getElementById("cards-container");
+      container.innerHTML="";
+
+      scryData.data.forEach(card=>{
+        const cardInfo=sheetData.find(row=>row["Card Name"].toLowerCase()===card.name.toLowerCase());
+        if(!cardInfo) return;
+
+        const div=document.createElement("div"); div.className="card";
+
+        const img=document.createElement("img");
+        if(card.image_uris) img.src=card.image_uris.normal;
+        else if(card.card_faces && card.card_faces[0].image_uris) img.src=card.card_faces[0].image_uris.normal;
+        img.alt=card.name;
+
+        const name=document.createElement("h3"); name.textContent=card.name;
+        const price=document.createElement("div"); price.className="price"; price.textContent="$"+cardInfo["Sell Price"];
+        const stock=document.createElement("div"); stock.className="stock"; stock.textContent="Stock: "+cardInfo["Stock"];
+
+        const qty=document.createElement("input"); qty.type="number"; qty.min=1; qty.max=cardInfo["Stock"]; qty.value=1;
+        const btn=document.createElement("button"); btn.className="buy"; btn.textContent="Add to Cart";
+
+        div.append(img,name,price,stock,qty,btn);
+        container.appendChild(div);
+      });
+    }
+    loadSet();
+  </script>
+</body>
+</html>
