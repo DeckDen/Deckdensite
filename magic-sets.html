@@ -4,11 +4,217 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Sets - DeckDen</title>
-  <link rel="stylesheet" href="style.css"> <!-- optional shared CSS -->
+  <!-- Font Awesome for account & menu icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #222222;
+      --accent-color: #cc5200; /* Darker orange */
+    }
+
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #f1f1f1;
+      --accent-color: #cc5200;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    nav {
+      width: 100%;
+      max-width: 100%;
+      background: var(--accent-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-left img {
+      width: 36px;
+      height: 36px;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    .nav-links {
+      display: flex;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      transition: opacity 0.3s;
+    }
+
+    .nav-links a:hover {
+      opacity: 0.8;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-right input[type="text"] {
+      width: 160px;
+      max-width: 100%;
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: none;
+      margin-right: 12px;
+    }
+
+    .nav-right button {
+      margin-left: 8px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: white;
+      color: var(--accent-color);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.3s;
+    }
+
+    .nav-right button:hover {
+      background-color: #f2f2f2;
+    }
+
+    .nav-right i {
+      color: white;
+      font-size: 1.2rem;
+      margin-left: 12px;
+      cursor: pointer;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      color: white;
+      cursor: pointer;
+      margin-left: 15px;
+    }
+
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      background: var(--accent-color);
+      padding: 10px 20px;
+    }
+
+    .mobile-menu a,
+    .mobile-menu input {
+      margin: 8px 0;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    h1 {
+      color: var(--accent-color);
+      font-size: 2.5rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      max-width: 600px;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links,
+      .nav-right input[type="text"] {
+        display: none;
+      }
+      .menu-toggle {
+        display: block;
+      }
+      .mobile-menu.show {
+        display: flex;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Magic Sets</h1>
-  <p>Welcome to the Magic Sets page. Here you’ll find all sets available in the store.</p>
-  <a href="index.html">← Back to Home</a>
+  <!-- Navigation Bar -->
+  <nav>
+    <div class="nav-left">
+      <a href="index.html"><img src="Deckden Transparent.png" alt="Home"></a>
+      <div class="nav-links">
+        <a href="magic-sets.html">Magic Sets</a>
+        <a href="#">Cart</a>
+        <a href="#">About Us</a>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <input type="text" placeholder="Search...">
+      <i class="fas fa-user" title="Account"></i>
+      <button onclick="toggleDarkMode()">🌙</button>
+      <i class="fas fa-bars menu-toggle" onclick="toggleMenu()"></i>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="magic-sets.html">Magic Sets</a>
+    <a href="#">Cart</a>
+    <a href="#">About Us</a>
+    <input type="text" placeholder="Search...">
+  </div>
+
+  <!-- Page Content -->
+  <div class="content">
+    <img src="Deckden Transparent.png" alt="DeckDen Logo" class="logo">
+    <h1>Magic Sets</h1>
+    <p>Welcome to the Magic Sets page. Here you’ll find all available sets in the store.</p>
+    <a href="index.html">← Back to Home</a>
+  </div>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function toggleMenu() {
+      document.getElementById('mobileMenu').classList.toggle('show');
+    }
+  </script>
 </body>
 </html>
