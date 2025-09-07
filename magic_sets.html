@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magic Sets - DeckDen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    :root { --bg-color:#fff; --text-color:#222; --accent-color:#cc5200; }
+    .dark-mode { --bg-color:#121212; --text-color:#f1f1f1; --accent-color:#cc5200; }
+    body { font-family:Arial,sans-serif; background:var(--bg-color); color:var(--text-color); margin:0; transition:.3s; overflow-x:hidden; }
+    nav { width:100%; background:var(--accent-color); display:flex; justify-content:space-between; align-items:center; padding:8px 20px; position:sticky; top:0; z-index:1000; }
+    .nav-left{display:flex;align-items:center;} .nav-left img{width:36px;height:36px;margin-right:12px;cursor:pointer;}
+    .nav-links{display:flex;} .nav-links a{color:#fff;text-decoration:none;margin:0 12px;font-weight:bold;font-size:.95rem;transition:opacity .3s;} .nav-links a:hover{opacity:.8;}
+    .nav-right{display:flex;align-items:center;} .nav-right input{width:160px;padding:5px 10px;border-radius:4px;border:none;margin-right:12px;}
+    .nav-right button{margin-left:8px;padding:5px 10px;border:none;border-radius:6px;background:#fff;color:var(--accent-color);cursor:pointer;font-size:.85rem;transition:.3s;} .nav-right button:hover{background:#f2f2f2;}
+    .nav-right i{color:#fff;font-size:1.2rem;margin-left:12px;cursor:pointer;}
+    .menu-toggle{display:none;font-size:1.5rem;color:#fff;cursor:pointer;margin-left:15px;}
+    .mobile-menu{display:none;flex-direction:column;background:var(--accent-color);padding:10px 20px;}
+    .mobile-menu a,.mobile-menu input{margin:8px 0;}
+    .content{max-width:900px;margin:auto;padding:40px 20px;}
+    h1{text-align:center;color:var(--accent-color);} 
+    #sets-container{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;}
+    .set-card{padding:15px;background:var(--bg-color);border:2px solid var(--accent-color);border-radius:8px;text-align:center;transition:.2s;} 
+    .set-card:hover{transform:scale(1.05);} .set-card a{text-decoration:none;color:var(--text-color);font-weight:bold;}
+    @media(max-width:768px){.nav-links,.nav-right input{display:none;} .menu-toggle{display:block;} .mobile-menu.show{display:flex;}}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <a href="index.html"><img src="Deckden Transparent.png" alt="Home"></a>
+      <div class="nav-links">
+        <a href="magic-sets.html">Magic Sets</a>
+        <a href="#">Cart</a>
+        <a href="#">About Us</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <input type="text" placeholder="Search...">
+      <i class="fas fa-user"></i>
+      <button onclick="toggleDarkMode()">🌙</button>
+      <i class="fas fa-bars menu-toggle" onclick="toggleMenu()"></i>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="magic-sets.html">Magic Sets</a>
+    <a href="#">Cart</a>
+    <a href="#">About Us</a>
+    <input type="text" placeholder="Search...">
+  </div>
+
+  <div class="content">
+    <h1>Magic Sets</h1>
+    <p style="text-align:center;">Select a set to view its cards.</p>
+    <div id="sets-container">Loading sets...</div>
+  </div>
+
+  <script>
+    function toggleDarkMode(){document.body.classList.toggle('dark-mode');}
+    function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('show');}
+
+    async function loadSets(){
+      const res=await fetch("https://api.scryfall.com/sets");
+      const data=await res.json();
+      const setsContainer=document.getElementById("sets-container");
+      setsContainer.innerHTML="";
+      const expansions=data.data.filter(s=>s.set_type==="expansion");
+      expansions.forEach(set=>{
+        const card=document.createElement("div"); card.className="set-card";
+        const link=document.createElement("a"); link.href=`set.html?code=${set.code}&name=${encodeURIComponent(set.name)}`;
+        link.textContent=set.name;
+        card.appendChild(link); setsContainer.appendChild(card);
+      });
+    }
+    loadSets();
+  </script>
+</body>
+</html>
