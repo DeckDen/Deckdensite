@@ -122,7 +122,7 @@
     /* --------- Load sets from your Sheet Web App (only visible rows) --------- */
     async function loadSets(){
       try{
-        if(!WEB_APP_URL || WEB_APP_URL.includes("https://script.google.com/macros/s/AKfycbwQplXlimKPYZ_VjIh0qhpKrFYlVl2_GdlzXFjJyF_YH4VuWvtci_2Oo73jJhtZvTRe/exec?onlyVisible=1")){
+        if(!WEB_APP_URL || WEB_APP_URL.includes("?onlyVisible=1")){
           document.getElementById('setsList').innerHTML =
             '<div class="row"><div class="name"><span class="title">Please set WEB_APP_URL in magic-sets.html</span></div></div>';
           return;
@@ -252,6 +252,7 @@
   </script>
 </body>
 </html>
+
 
 
 
