@@ -69,11 +69,11 @@
     @media (max-width: 900px){
       .nav-links{display:none}
       .row{gap:8px}
-      th:nth-child(6), td:nth-child(6){display:none} /* Type line hide on narrow */
-      th:nth-child(8), td:nth-child(8){display:none} /* Variant hide on narrow */
+      th:nth-child(6), td:nth-child(6){display:none} /* Type line on narrow */
+      th:nth-child(8), td:nth-child(8){display:none} /* Variant on narrow */
     }
     @media (max-width: 640px){
-      th:nth-child(5), td:nth-child(5){display:none} /* Colour hide on very narrow */
+      th:nth-child(5), td:nth-child(5){display:none} /* Colour on very narrow */
       .controls .row .chip label{display:none}
       .nav-right input[type="search"]{display:block;width:150px;padding:6px 8px;border-radius:8px;border:none}
     }
@@ -158,21 +158,20 @@
 
   <script>
     /* -----------------------------
-       CONFIG: point to your Web App
+       CONFIG: your Web App
        ----------------------------- */
     const CARDS_API_BASE = "https://script.google.com/macros/s/AKfycbwQplXlimKPYZ_VjIh0qhpKrFYlVl2_GdlzXFjJyF_YH4VuWvtci_2Oo73jJhtZvTRe/exec";
-    // This page will request:  ?cards=1&set=FIN
-    // Expected JSON: { rows: [ { "Card Name":"...", "Collector No":"...", "Market AUD":"...", "Sell Price (AUD, +10%)":"...",
-    //   "Color Identity":"W,U", "Type Line":"Creature — ...", "Rarity":"rare", "Finish":"foil", "Variant":"Borderless",
-    //   "Qty Owned": 3 }, ... ] }
+    // This page requests:  ?cards=1&set=FIN
+    // Expected JSON rows with headers from your sheet:
+    // "Card Name","Collector No","Sell Price (AUD, +10%)","Market AUD","Color Identity","Type Line","Rarity","Finish","Variant","Qty Owned"
 
     /* -----------------------------
        THEME
        ----------------------------- */
     function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); }
-    // Carry header search into main search
     document.getElementById('qsHeader').addEventListener('input', (e)=>{
       document.getElementById('q').value = e.target.value;
+      state.filters.q = e.target.value;
       applyFiltersAndRender();
     });
 
@@ -185,32 +184,24 @@
       raw: [],
       view: [],
       sort: { key: 'name', dir: 'asc' },
-      filters: {
-        q: '',
-        type: '',
-        finish: '',
-        rarity: '',
-        variant: '',
-        inStock: false
-      }
+      filters: { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false }
     };
 
     /* -----------------------------
        UTILITIES
        ----------------------------- */
     function parseColourId(ci){
-      if(!ci) return "";
+      if(!ci) return "Colorless";
       const map = { W:"White", U:"Blue", B:"Black", R:"Red", G:"Green", C:"Colorless" };
       const parts = String(ci).split(',').filter(Boolean);
-      if(parts.length===0) return "Colorless";
-      return parts.map(x => map[x] || x).join('/');
+      return parts.length ? parts.map(x => map[x] || x).join('/') : "Colorless";
     }
     function typeBucket(typeLine){
       if(!typeLine) return "";
       const t = String(typeLine).toLowerCase();
       const order = ["creature","instant","sorcery","artifact","enchantment","planeswalker","battle","land"];
       for(const k of order){ if(t.includes(k)) return k.charAt(0).toUpperCase()+k.slice(1); }
-      return typeLine.split('—')[0].trim(); // fallback: leading type segment
+      return typeLine.split('—')[0].trim();
     }
     function normalizeRow(row){
       const name = row["Card Name"] || row.name || "";
@@ -222,7 +213,6 @@
       const finish = (row["Finish"] || row.finish || "").toString().toLowerCase();
       const variant = row["Variant"] || row.variant || "Standard";
       const stock = parseInt(row["Qty Owned"] || row["Quantity Owned"] || row.stock || "0", 10) || 0;
-
       return { name, number, price, colour, type, rarity, finish, variant, stock, _raw: row };
     }
     function uniqueSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
@@ -231,16 +221,16 @@
     /* -----------------------------
        RENDER
        ----------------------------- */
-    function renderFiltersFromData(rows){
+    function renderFiltersFromData(fullRows){  // <-- always from FULL data
       const typeSel = document.getElementById('typeFilter');
       const finishSel = document.getElementById('finishFilter');
       const raritySel = document.getElementById('rarityFilter');
       const variantSel = document.getElementById('variantFilter');
 
-      const types = uniqueSorted(rows.map(r=>r.type));
-      const finishes = uniqueSorted(rows.map(r=>r.finish));
-      const rarities = uniqueSorted(rows.map(r=>r.rarity));
-      const variants = uniqueSorted(rows.map(r=>r.variant));
+      const types = uniqueSorted(fullRows.map(r=>r.type));
+      const finishes = uniqueSorted(fullRows.map(r=>r.finish));
+      const rarities = uniqueSorted(fullRows.map(r=>r.rarity));
+      const variants = uniqueSorted(fullRows.map(r=>r.variant));
 
       function fillSelect(sel, items, label){
         const keep = sel.value;
@@ -259,21 +249,19 @@
         tb.innerHTML = `<tr><td colspan="9" class="no-results">No cards match your filters.</td></tr>`;
         return;
       }
-      const rowsHtml = state.view.map(r => {
-        return `
-          <tr>
-            <td class="name-cell">${r.name}</td>
-            <td>${r.number || ''}</td>
-            <td>${formatPrice(r.price)}</td>
-            <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
-            <td>${r.colour}</td>
-            <td>${r.type}</td>
-            <td>${r.rarity ? r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1) : ''}</td>
-            <td>${r.variant}</td>
-            <td>${r.stock}</td>
-          </tr>
-        `;
-      }).join('');
+      const rowsHtml = state.view.map(r => `
+        <tr>
+          <td class="name-cell"><a href="card.html?code=${encodeURIComponent(state.setCode)}&number=${encodeURIComponent(r.number)}&name=${encodeURIComponent(r.name)}&finish=${encodeURIComponent(r.finish)}&variant=${encodeURIComponent(r.variant)}">${r.name}</a></td>
+          <td>${r.number || ''}</td>
+          <td>${formatPrice(r.price)}</td>
+          <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
+          <td>${r.colour}</td>
+          <td>${r.type}</td>
+          <td>${r.rarity ? r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1) : ''}</td>
+          <td>${r.variant}</td>
+          <td>${r.stock}</td>
+        </tr>
+      `).join('');
       tb.innerHTML = rowsHtml;
     }
 
@@ -283,8 +271,10 @@
     function applyFiltersAndRender(){
       const f = state.filters;
       const q = f.q.trim().toLowerCase();
+
+      // Start from ALL rows, and only filter stock when checkbox is on
       let v = state.raw.filter(r => {
-        if(f.inStock && !(r.stock>0)) return false;
+        if(f.inStock && !(r.stock>0)) return false;         // <-- only filter stock when requested
         if(f.type && r.type !== f.type) return false;
         if(f.finish && (r.finish.charAt(0).toUpperCase()+r.finish.slice(1)) !== f.finish) return false;
         if(f.rarity && (r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1)) !== f.rarity) return false;
@@ -304,7 +294,6 @@
         const A = a[key] ?? "", B = b[key] ?? "";
         if(key === 'price'){ return ((a.price||0) - (b.price||0)) * mul; }
         if(key === 'stock'){ return ((a.stock||0) - (b.stock||0)) * mul; }
-        // numeric-aware compare for collector numbers
         if(key === 'number'){
           const an = parseInt(String(A).replace(/\D+/g,''),10)||0;
           const bn = parseInt(String(B).replace(/\D+/g,''),10)||0;
@@ -315,14 +304,11 @@
       });
 
       state.view = v;
-      renderFiltersFromData(v); // keep dropdowns aligned with current data
       renderTable();
     }
 
     function attachEvents(){
-      document.getElementById('q').addEventListener('input', e => {
-        state.filters.q = e.target.value; applyFiltersAndRender();
-      });
+      document.getElementById('q').addEventListener('input', e => { state.filters.q = e.target.value; applyFiltersAndRender(); });
       document.getElementById('typeFilter').addEventListener('change', e => { state.filters.type = e.target.value; applyFiltersAndRender(); });
       document.getElementById('finishFilter').addEventListener('change', e => { state.filters.finish = e.target.value; applyFiltersAndRender(); });
       document.getElementById('rarityFilter').addEventListener('change', e => { state.filters.rarity = e.target.value; applyFiltersAndRender(); });
@@ -362,7 +348,6 @@
       const res = await fetch(url);
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      // Accept either {rows:[...]} or a bare array [...]
       const rows = Array.isArray(json) ? json : (json.rows || json.data || []);
       return rows.map(normalizeRow);
     }
@@ -382,10 +367,11 @@
       }
 
       try{
-        const rows = await fetchCards(state.setCode);
-        state.raw = rows;
-        state.view = rows.slice();
+        state.raw = await fetchCards(state.setCode);
+        // Always build dropdowns from the FULL dataset so options never “disappear”
         renderFiltersFromData(state.raw);
+        // Start with everything visible (including stock = 0)
+        state.view = state.raw.slice();
         applyFiltersAndRender();
       }catch(err){
         console.error(err);
@@ -397,4 +383,3 @@
   </script>
 </body>
 </html>
-
