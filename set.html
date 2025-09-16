@@ -1,41 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Set - DeckDen</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Set – DeckDen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    *{box-sizing:border-box;}
-    :root{--bg-color:#fff;--text-color:#222;--accent-color:#cc5200;}
-    .dark-mode{--bg-color:#121212;--text-color:#f1f1f1;--accent-color:#cc5200;}
-    body{font-family:Arial,sans-serif;background:var(--bg-color);color:var(--text-color);margin:0;transition:.3s;}
-    nav{width:100%;background:var(--accent-color);display:flex;justify-content:space-between;align-items:center;padding:8px 20px;position:sticky;top:0;z-index:1000;}
-    .nav-left{display:flex;align-items:center;} .nav-left img{width:36px;height:36px;margin-right:12px;cursor:pointer;}
-    .nav-links{display:flex;} .nav-links a{color:#fff;text-decoration:none;margin:0 12px;font-weight:bold;font-size:.95rem;transition:opacity .3s;} .nav-links a:hover{opacity:.8;}
-    .nav-right{display:flex;align-items:center;} .nav-right input{width:160px;padding:5px 10px;border-radius:4px;border:none;margin-right:12px;}
-    .nav-right button{margin-left:8px;padding:5px 10px;border:none;border-radius:6px;background:#fff;color:var(--accent-color);cursor:pointer;font-size:.85rem;transition:.3s;} .nav-right button:hover{background:#f2f2f2;}
-    .nav-right i{color:#fff;font-size:1.2rem;margin-left:12px;cursor:pointer;}
-    .menu-toggle{display:none;font-size:1.5rem;color:#fff;cursor:pointer;margin-left:15px;}
-    .mobile-menu{display:none;flex-direction:column;background:var(--accent-color);padding:10px 20px;}
-    .mobile-menu a,.mobile-menu input{margin:8px 0;}
-    .content{max-width:1100px;margin:auto;padding:40px 20px;}
-    h1{text-align:center;color:var(--accent-color);}
-    #cards-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;margin-top:20px;}
-    .card{border:2px solid var(--accent-color);border-radius:8px;padding:10px;text-align:center;background:var(--bg-color);transition:.3s;}
-    .card img{width:100%;max-width:200px;border-radius:6px;}
-    .price{font-weight:bold;margin:5px 0;}
-    .stock{font-size:.9rem;margin:5px 0;}
-    input[type=number]{width:60px;text-align:center;margin:5px;}
-    button.buy{background:var(--accent-color);color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;}
-    button.buy:hover{background:#a63f00;}
-    @media(max-width:768px){.nav-links,.nav-right input{display:none;} .menu-toggle{display:block;} .mobile-menu.show{display:flex;}}
+    :root{
+      --bg:#ffffff; --text:#222; --muted:#666;
+      --accent:#b84e00; /* darker orange */
+      --card:#fff; --line:#e8e8e8; --line-strong:#000;
+      --chip:#f5f5f5;
+    }
+    .dark-mode{
+      --bg:#121212; --text:#f1f1f1; --muted:#c7c7c7;
+      --accent:#b84e00;
+      --card:#1b1b1b; --line:#2a2a2a; --line-strong:#fff;
+      --chip:#1f1f1f;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;transition:background .25s,color .25s}
+    a{color:inherit}
+
+    /* Header */
+    nav{
+      width:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:space-between;
+      padding:8px 16px;position:sticky;top:0;z-index:10
+    }
+    .nav-left{display:flex;align-items:center;gap:10px}
+    .nav-left img{width:34px;height:34px;object-fit:contain;cursor:pointer}
+    .nav-links{display:flex;gap:12px}
+    .nav-links a{color:#fff;text-decoration:none;font-weight:600;opacity:.95}
+    .nav-links a:hover{opacity:1}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-right input[type="search"]{display:none}
+    .nav-right .icon-btn{background:#fff;border:none;color:var(--accent);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+    .nav-right i{font-size:1.1rem;cursor:pointer}
+
+    .container{max-width:1100px;margin:24px auto;padding:0 16px}
+
+    /* Controls row */
+    .controls{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+    .row{display:flex;flex-wrap:wrap;gap:10px}
+    .chip{
+      background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px
+    }
+    .chip label{font-size:.85rem;color:var(--muted)}
+    .chip input[type="search"]{border:none;background:transparent;outline:none;color:var(--text);min-width:260px}
+    .chip select{border:none;background:transparent;outline:none;color:var(--text)}
+    .chip input[type="checkbox"]{transform:translateY(1px)}
+    .clear-btn{margin-left:auto;background:transparent;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:8px 10px;cursor:pointer}
+    .clear-btn:hover{border-color:var(--muted);color:var(--text)}
+
+    /* Table */
+    .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    thead{background:linear-gradient(to bottom, rgba(0,0,0,.06), rgba(0,0,0,0))}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+    th{font-size:.85rem;color:var(--muted);user-select:none;cursor:pointer;white-space:nowrap}
+    th .sort{margin-left:6px;opacity:.6}
+    tr:hover td{background:rgba(0,0,0,.02)}
+    .name-cell{font-weight:600}
+    .subline{font-size:.85rem;color:var(--muted)}
+    .no-results{padding:24px;text-align:center;color:var(--muted)}
+    .divider{height:1px;background:var(--line-strong);margin:8px 0}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .nav-links{display:none}
+      .row{gap:8px}
+      th:nth-child(6), td:nth-child(6){display:none} /* Type line hide on narrow */
+      th:nth-child(8), td:nth-child(8){display:none} /* Variant hide on narrow */
+    }
+    @media (max-width: 640px){
+      th:nth-child(5), td:nth-child(5){display:none} /* Colour hide on very narrow */
+      .controls .row .chip label{display:none}
+      .nav-right input[type="search"]{display:block;width:150px;padding:6px 8px;border-radius:8px;border:none}
+    }
   </style>
 </head>
 <body>
   <nav>
     <div class="nav-left">
-      <a href="index.html"><img src="Deckden Transparent.png" alt="Home"></a>
+      <a href="index.html" title="Home">
+        <img src="Deckden Transparent.png" alt="DeckDen logo">
+      </a>
       <div class="nav-links">
         <a href="magic-sets.html">Magic Sets</a>
         <a href="#">Cart</a>
@@ -43,70 +92,308 @@
       </div>
     </div>
     <div class="nav-right">
-      <input type="text" placeholder="Search...">
-      <i class="fas fa-user"></i>
-      <button onclick="toggleDarkMode()">🌙</button>
-      <i class="fas fa-bars menu-toggle" onclick="toggleMenu()"></i>
+      <input id="qsHeader" type="search" placeholder="Search…"/>
+      <i class="fas fa-user" title="Account"></i>
+      <button class="icon-btn" onclick="toggleDarkMode()" title="Dark mode">🌙</button>
     </div>
   </nav>
 
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="magic-sets.html">Magic Sets</a>
-    <a href="#">Cart</a>
-    <a href="#">About Us</a>
-    <input type="text" placeholder="Search...">
-  </div>
+  <div class="container">
+    <h1 id="setTitle">Loading…</h1>
 
-  <div class="content">
-    <h1 id="set-title">Loading...</h1>
-    <div id="cards-container">Loading cards...</div>
+    <!-- Controls -->
+    <div class="controls">
+      <div class="row">
+        <div class="chip">
+          <label for="q">Search</label>
+          <input id="q" type="search" placeholder="Search cards… (name/type/variant)"/>
+        </div>
+        <div class="chip">
+          <label for="typeFilter">Type</label>
+          <select id="typeFilter"><option value="">All Types</option></select>
+        </div>
+        <div class="chip">
+          <label for="finishFilter">Finish</label>
+          <select id="finishFilter"><option value="">All Finishes</option></select>
+        </div>
+        <div class="chip">
+          <label for="rarityFilter">Rarity</label>
+          <select id="rarityFilter"><option value="">All Rarities</option></select>
+        </div>
+        <div class="chip">
+          <label for="variantFilter">Variant</label>
+          <select id="variantFilter"><option value="">All Variants</option></select>
+        </div>
+        <div class="chip">
+          <input id="inStock" type="checkbox"/>
+          <label for="inStock">In stock only</label>
+        </div>
+        <button class="clear-btn" id="clearFilters">Clear</button>
+      </div>
+      <div class="divider"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="cardsTable" aria-describedby="setTitle">
+        <thead>
+          <tr>
+            <th data-key="name">Name <span class="sort">↕</span></th>
+            <th data-key="number"># <span class="sort">↕</span></th>
+            <th data-key="price">Price (AUD) <span class="sort">↕</span></th>
+            <th data-key="finish">Finish <span class="sort">↕</span></th>
+            <th data-key="colour">Colour <span class="sort">↕</span></th>
+            <th data-key="type">Type <span class="sort">↕</span></th>
+            <th data-key="rarity">Rarity <span class="sort">↕</span></th>
+            <th data-key="variant">Variant <span class="sort">↕</span></th>
+            <th data-key="stock">Stock <span class="sort">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="9" class="no-results">Loading cards…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
-    function toggleDarkMode(){document.body.classList.toggle('dark-mode');}
-    function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('show');}
+    /* -----------------------------
+       CONFIG: point to your Web App
+       ----------------------------- */
+    const CARDS_API_BASE = "https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec";
+    // This page will request:  ?cards=1&set=FIN
+    // Expected JSON: { rows: [ { "Card Name":"...", "Collector No":"...", "Market AUD":"...", "Sell Price (AUD, +10%)":"...",
+    //   "Color Identity":"W,U", "Type Line":"Creature — ...", "Rarity":"rare", "Finish":"foil", "Variant":"Borderless",
+    //   "Qty Owned": 3 }, ... ] }
 
-    async function loadSet(){
-      const params=new URLSearchParams(window.location.search);
-      const setCode=params.get("code");
-      const setName=params.get("name")||setCode;
-      document.getElementById("set-title").textContent=setName;
+    /* -----------------------------
+       THEME
+       ----------------------------- */
+    function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); }
+    // Carry header search into main search
+    document.getElementById('qsHeader').addEventListener('input', (e)=>{
+      document.getElementById('q').value = e.target.value;
+      applyFiltersAndRender();
+    });
 
-      // 1. Fetch Scryfall cards
-      const response=await fetch(`https://api.scryfall.com/cards/search?q=set:${setCode}`);
-      const scryData=await response.json();
+    /* -----------------------------
+       STATE
+       ----------------------------- */
+    const state = {
+      setCode: null,
+      setName: null,
+      raw: [],
+      view: [],
+      sort: { key: 'name', dir: 'asc' },
+      filters: {
+        q: '',
+        type: '',
+        finish: '',
+        rarity: '',
+        variant: '',
+        inStock: false
+      }
+    };
 
-      // 2. Fetch Google Sheet data (replace with your JSON API URL)
-      const sheetURL="YOUR_GOOGLE_SHEET_JSON_URL";
-      const sheetRes=await fetch(sheetURL);
-      const sheetData=await sheetRes.json();
+    /* -----------------------------
+       UTILITIES
+       ----------------------------- */
+    function parseColourId(ci){
+      if(!ci) return "";
+      const map = { W:"White", U:"Blue", B:"Black", R:"Red", G:"Green", C:"Colorless" };
+      const parts = String(ci).split(',').filter(Boolean);
+      if(parts.length===0) return "Colorless";
+      return parts.map(x => map[x] || x).join('/');
+    }
+    function typeBucket(typeLine){
+      if(!typeLine) return "";
+      const t = String(typeLine).toLowerCase();
+      const order = ["creature","instant","sorcery","artifact","enchantment","planeswalker","battle","land"];
+      for(const k of order){ if(t.includes(k)) return k.charAt(0).toUpperCase()+k.slice(1); }
+      return typeLine.split('—')[0].trim(); // fallback: leading type segment
+    }
+    function normalizeRow(row){
+      const name = row["Card Name"] || row.name || "";
+      const number = String(row["Collector No"] || row["Collector Number"] || row.number || "").trim();
+      const price = parseFloat(row["Sell Price (AUD, +10%)"] || row["Market AUD"] || row.price || "0") || 0;
+      const colour = parseColourId(row["Color Identity"] || row["Colour Identity"] || row.colour || "");
+      const type = typeBucket(row["Type Line"] || row.type || "");
+      const rarity = (row["Rarity"] || row.rarity || "").toString().toLowerCase();
+      const finish = (row["Finish"] || row.finish || "").toString().toLowerCase();
+      const variant = row["Variant"] || row.variant || "Standard";
+      const stock = parseInt(row["Qty Owned"] || row["Quantity Owned"] || row.stock || "0", 10) || 0;
 
-      const container=document.getElementById("cards-container");
-      container.innerHTML="";
+      return { name, number, price, colour, type, rarity, finish, variant, stock, _raw: row };
+    }
+    function uniqueSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
+    function formatPrice(n){ return n>0 ? `$${n.toFixed(2)}` : ""; }
 
-      scryData.data.forEach(card=>{
-        const cardInfo=sheetData.find(row=>row["Card Name"].toLowerCase()===card.name.toLowerCase());
-        if(!cardInfo) return;
+    /* -----------------------------
+       RENDER
+       ----------------------------- */
+    function renderFiltersFromData(rows){
+      const typeSel = document.getElementById('typeFilter');
+      const finishSel = document.getElementById('finishFilter');
+      const raritySel = document.getElementById('rarityFilter');
+      const variantSel = document.getElementById('variantFilter');
 
-        const div=document.createElement("div"); div.className="card";
+      const types = uniqueSorted(rows.map(r=>r.type));
+      const finishes = uniqueSorted(rows.map(r=>r.finish));
+      const rarities = uniqueSorted(rows.map(r=>r.rarity));
+      const variants = uniqueSorted(rows.map(r=>r.variant));
 
-        const img=document.createElement("img");
-        if(card.image_uris) img.src=card.image_uris.normal;
-        else if(card.card_faces && card.card_faces[0].image_uris) img.src=card.card_faces[0].image_uris.normal;
-        img.alt=card.name;
+      function fillSelect(sel, items, label){
+        const keep = sel.value;
+        sel.innerHTML = `<option value="">All ${label}</option>` + items.map(v=>`<option value="${v}">${v}</option>`).join('');
+        if(items.includes(keep)) sel.value = keep;
+      }
+      fillSelect(typeSel, types, "Types");
+      fillSelect(finishSel, finishes.map(f=>f.charAt(0).toUpperCase()+f.slice(1)), "Finishes");
+      fillSelect(raritySel, rarities.map(r=>r.charAt(0).toUpperCase()+r.slice(1)), "Rarities");
+      fillSelect(variantSel, variants, "Variants");
+    }
 
-        const name=document.createElement("h3"); name.textContent=card.name;
-        const price=document.createElement("div"); price.className="price"; price.textContent="$"+cardInfo["Sell Price"];
-        const stock=document.createElement("div"); stock.className="stock"; stock.textContent="Stock: "+cardInfo["Stock"];
+    function renderTable(){
+      const tb = document.getElementById('tbody');
+      if(state.view.length===0){
+        tb.innerHTML = `<tr><td colspan="9" class="no-results">No cards match your filters.</td></tr>`;
+        return;
+      }
+      const rowsHtml = state.view.map(r => {
+        return `
+          <tr>
+            <td class="name-cell">${r.name}</td>
+            <td>${r.number || ''}</td>
+            <td>${formatPrice(r.price)}</td>
+            <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
+            <td>${r.colour}</td>
+            <td>${r.type}</td>
+            <td>${r.rarity ? r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1) : ''}</td>
+            <td>${r.variant}</td>
+            <td>${r.stock}</td>
+          </tr>
+        `;
+      }).join('');
+      tb.innerHTML = rowsHtml;
+    }
 
-        const qty=document.createElement("input"); qty.type="number"; qty.min=1; qty.max=cardInfo["Stock"]; qty.value=1;
-        const btn=document.createElement("button"); btn.className="buy"; btn.textContent="Add to Cart";
+    /* -----------------------------
+       FILTER + SORT
+       ----------------------------- */
+    function applyFiltersAndRender(){
+      const f = state.filters;
+      const q = f.q.trim().toLowerCase();
+      let v = state.raw.filter(r => {
+        if(f.inStock && !(r.stock>0)) return false;
+        if(f.type && r.type !== f.type) return false;
+        if(f.finish && (r.finish.charAt(0).toUpperCase()+r.finish.slice(1)) !== f.finish) return false;
+        if(f.rarity && (r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1)) !== f.rarity) return false;
+        if(f.variant && r.variant !== f.variant) return false;
 
-        div.append(img,name,price,stock,qty,btn);
-        container.appendChild(div);
+        if(q){
+          const hay = (r.name+" "+r.type+" "+r.variant+" "+r.number).toLowerCase();
+          if(!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      // sort
+      const { key, dir } = state.sort;
+      const mul = dir === 'asc' ? 1 : -1;
+      v.sort((a,b)=>{
+        const A = a[key] ?? "", B = b[key] ?? "";
+        if(key === 'price'){ return ((a.price||0) - (b.price||0)) * mul; }
+        if(key === 'stock'){ return ((a.stock||0) - (b.stock||0)) * mul; }
+        // numeric-aware compare for collector numbers
+        if(key === 'number'){
+          const an = parseInt(String(A).replace(/\D+/g,''),10)||0;
+          const bn = parseInt(String(B).replace(/\D+/g,''),10)||0;
+          if(an!==bn) return (an-bn)*mul;
+          return String(A).localeCompare(String(B)) * mul;
+        }
+        return String(A).localeCompare(String(B)) * mul;
+      });
+
+      state.view = v;
+      renderFiltersFromData(v); // keep dropdowns aligned with current data
+      renderTable();
+    }
+
+    function attachEvents(){
+      document.getElementById('q').addEventListener('input', e => {
+        state.filters.q = e.target.value; applyFiltersAndRender();
+      });
+      document.getElementById('typeFilter').addEventListener('change', e => { state.filters.type = e.target.value; applyFiltersAndRender(); });
+      document.getElementById('finishFilter').addEventListener('change', e => { state.filters.finish = e.target.value; applyFiltersAndRender(); });
+      document.getElementById('rarityFilter').addEventListener('change', e => { state.filters.rarity = e.target.value; applyFiltersAndRender(); });
+      document.getElementById('variantFilter').addEventListener('change', e => { state.filters.variant = e.target.value; applyFiltersAndRender(); });
+      document.getElementById('inStock').addEventListener('change', e => { state.filters.inStock = e.target.checked; applyFiltersAndRender(); });
+      document.getElementById('clearFilters').addEventListener('click', ()=>{
+        state.filters = { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false };
+        document.getElementById('q').value = '';
+        document.getElementById('qsHeader').value = '';
+        document.getElementById('typeFilter').value = '';
+        document.getElementById('finishFilter').value = '';
+        document.getElementById('rarityFilter').value = '';
+        document.getElementById('variantFilter').value = '';
+        document.getElementById('inStock').checked = false;
+        applyFiltersAndRender();
+      });
+
+      // header sorters
+      document.querySelectorAll('th[data-key]').forEach(th=>{
+        th.addEventListener('click', ()=>{
+          const k = th.getAttribute('data-key');
+          if(state.sort.key === k){
+            state.sort.dir = (state.sort.dir === 'asc') ? 'desc' : 'asc';
+          }else{
+            state.sort.key = k; state.sort.dir = 'asc';
+          }
+          applyFiltersAndRender();
+        });
       });
     }
-    loadSet();
+
+    /* -----------------------------
+       DATA LOADING
+       ----------------------------- */
+    async function fetchCards(setCode){
+      const url = `${CARDS_API_BASE}?cards=1&set=${encodeURIComponent(setCode)}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      // Accept either {rows:[...]} or a bare array [...]
+      const rows = Array.isArray(json) ? json : (json.rows || json.data || []);
+      return rows.map(normalizeRow);
+    }
+
+    async function init(){
+      attachEvents();
+
+      const params = new URLSearchParams(location.search);
+      state.setCode = (params.get('code') || '').trim().toLowerCase();
+      state.setName = params.get('name') || state.setCode || 'Set';
+
+      document.getElementById('setTitle').textContent = state.setName || 'Set';
+
+      if(!state.setCode){
+        document.getElementById('tbody').innerHTML = `<tr><td colspan="9" class="no-results">Missing ?code=SETCODE</td></tr>`;
+        return;
+      }
+
+      try{
+        const rows = await fetchCards(state.setCode);
+        state.raw = rows;
+        state.view = rows.slice();
+        renderFiltersFromData(state.raw);
+        applyFiltersAndRender();
+      }catch(err){
+        console.error(err);
+        document.getElementById('tbody').innerHTML = `<tr><td colspan="9" class="no-results">Failed to load cards for ${state.setCode}.</td></tr>`;
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
