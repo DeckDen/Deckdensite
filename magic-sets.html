@@ -106,8 +106,8 @@
   </div>
 
   <script>
-    /* --------- Config: put your Web App URL here --------- */
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwQplXlimKPYZ_VjIh0qhpKrFYlVl2_GdlzXFjJyF_YH4VuWvtci_2Oo73jJhtZvTRe/exec?onlyVisible=1"; // e.g. https://script.google.com/macros/s/XXXX/exec
+    /* --------- Config: your Web App base URL (NO query string) --------- */
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwQplXlimKPYZ_VjIh0qhpKrFYlVl2_GdlzXFjJyF_YH4VuWvtci_2Oo73jJhtZvTRe/exec";
 
     /* --------- Header actions --------- */
     function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); }
@@ -122,12 +122,15 @@
     /* --------- Load sets from your Sheet Web App (only visible rows) --------- */
     async function loadSets(){
       try{
-        if(!WEB_APP_URL || WEB_APP_URL.includes("?onlyVisible=1")){
+        if(!WEB_APP_URL){
           document.getElementById('setsList').innerHTML =
             '<div class="row"><div class="name"><span class="title">Please set WEB_APP_URL in magic-sets.html</span></div></div>';
           return;
         }
-        const res = await fetch(`${WEB_APP_URL}?onlyVisible=1`, {cache:"no-store"});
+        // Append the visibility flag safely (handles existing query strings too)
+        const url = WEB_APP_URL + (WEB_APP_URL.includes("?") ? "&onlyVisible=1" : "?onlyVisible=1");
+        const res = await fetch(url, {cache:"no-store"});
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const payload = await res.json();
         const sets = (payload && payload.sets) ? payload.sets : [];
 
@@ -140,10 +143,8 @@
           const parentCode = String(s.parent_set_code||"").toLowerCase();
           if(parentCode && byCode.has(parentCode)){
             if(!groupsMap.has(parentCode)) groupsMap.set(parentCode, { parent: byCode.get(parentCode), subsets: [] });
-            // avoid duplicating the parent inside its own subsets
             if(code !== parentCode) groupsMap.get(parentCode).subsets.push(s);
           } else {
-            // a standalone parent (or parent not present in visible list)
             if(!groupsMap.has(code)) groupsMap.set(code, { parent: s, subsets: [] });
           }
         });
@@ -252,7 +253,3 @@
   </script>
 </body>
 </html>
-
-
-
-
