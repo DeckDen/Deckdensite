@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Card – DeckDen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root{
+      --bg:#ffffff; --text:#222; --muted:#666;
+      --accent:#b84e00; /* darker orange */
+      --card:#fff; --line:#e8e8e8; --line-strong:#000;
+      --chip:#f5f5f5;
+    }
+    .dark-mode{
+      --bg:#121212; --text:#f1f1f1; --muted:#c7c7c7;
+      --accent:#b84e00;
+      --card:#1b1b1b; --line:#2a2a2a; --line-strong:#fff;
+      --chip:#1f1f1f;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;transition:background .25s,color .25s}
+    a{color:inherit}
+
+    /* Header */
+    nav{
+      width:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:space-between;
+      padding:8px 16px;position:sticky;top:0;z-index:10
+    }
+    .nav-left{display:flex;align-items:center;gap:10px}
+    .nav-left img{width:34px;height:34px;object-fit:contain;cursor:pointer}
+    .nav-links{display:flex;gap:12px}
+    .nav-links a{color:#fff;text-decoration:none;font-weight:600;opacity:.95}
+    .nav-links a:hover{opacity:1}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-right input[type="search"]{display:none}
+    .nav-right .icon-btn{background:#fff;border:none;color:var(--accent);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+    .nav-right i{font-size:1.1rem;cursor:pointer}
+
+    .container{max-width:1100px;margin:24px auto;padding:0 16px}
+
+    /* Card layout */
+    .grid{
+      display:grid;grid-template-columns: 360px 1fr;gap:24px;
+    }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+    .cardpanel{
+      background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;
+    }
+    .card-img-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+    .card-img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line)}
+    .img-controls{display:flex;gap:10px}
+    .btn{background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .btn:hover{border-color:var(--muted)}
+
+    .title{margin:0 0 6px 0;font-size:1.5rem;font-weight:700}
+    .subtle{color:var(--muted)}
+    .price{font-size:1.25rem;font-weight:700;margin:10px 0}
+    .stock{margin:6px 0}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .qty{width:80px;padding:8px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--text)}
+    .cta{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+
+    .rulebox{white-space:pre-wrap;line-height:1.35;border:1px dashed var(--line);border-radius:12px;padding:12px;background:var(--card)}
+    .section{margin-top:22px}
+    h2{font-size:1.1rem;margin:0 0 10px 0}
+
+    .variants{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .variants table{width:100%;border-collapse:collapse}
+    .variants th, .variants td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:.95rem}
+    .variants th{color:var(--muted);font-weight:600}
+    .variants a{text-decoration:none}
+    .badge{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:var(--chip);font-size:.8rem}
+
+    .crumbs{font-size:.9rem;margin-bottom:8px}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <a href="index.html" title="Home">
+        <img src="Deckden Transparent.png" alt="DeckDen logo">
+      </a>
+      <div class="nav-links">
+        <a href="magic-sets.html">Magic Sets</a>
+        <a href="#">Cart</a>
+        <a href="#">About Us</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <input id="qsHeader" type="search" placeholder="Search…"/>
+      <i class="fas fa-user" title="Account"></i>
+      <button class="icon-btn" onclick="toggleDarkMode()" title="Dark mode">🌙</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="crumbs"><a href="magic-sets.html">Sets</a> · <a id="setLink" href="#">Back to set</a></div>
+
+    <div class="grid">
+      <!-- Left: image & flip -->
+      <div class="cardpanel">
+        <div class="card-img-wrap">
+          <img id="cardImg" class="card-img" alt="Card image"/>
+          <div class="img-controls">
+            <button id="flipBtn" class="btn" style="display:none">Flip</button>
+            <a id="scryLink" class="btn" target="_blank" rel="noopener">View on Scryfall</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: info & buy -->
+      <div>
+        <h1 id="cardTitle" class="title">Loading…</h1>
+        <div class="subtle" id="cardMeta"></div>
+        <div class="price" id="cardPrice"></div>
+        <div class="stock" id="cardStock"></div>
+        <div class="row">
+          <input id="qty" class="qty" type="number" min="1" value="1"/>
+          <button class="cta" onclick="addToCart()">Add to Cart</button>
+        </div>
+
+        <div class="section">
+          <h2>Rules Text</h2>
+          <div id="rules" class="rulebox">Loading text…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other in-stock variants (no images) -->
+    <div class="section variants">
+      <h2 style="padding:12px">Other Variants in Stock</h2>
+      <table id="variantsTable" aria-label="Other variants">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Finish</th>
+            <th>Variant</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="variantsBody">
+          <tr><td colspan="6" style="color:var(--muted);padding:14px">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- CONFIG ---------- */
+    const CARDS_API_BASE = "https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec";
+    // set.html should link here as: card.html?code=FIN&number=317&name=Sephiroth%2C%20Fabled%20SOLDIER
+    // We will:
+    // 1) pull the specific print from Scryfall (by set + collector number OR by exact name within set)
+    // 2) load all rows for that set from Sheets (?cards=1&set=FIN)
+    // 3) find the matching row (finish/variant) for price + stock
+    // 4) list other in-stock rows for the same card name
+
+    /* ---------- THEME ---------- */
+    function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); }
+
+    /* ---------- HELPERS ---------- */
+    function qsel(s){ return document.querySelector(s); }
+    function money(n){ return n>0 ? `$${Number(n).toFixed(2)}` : ""; }
+    function up(s){ return (s||"").toString().toUpperCase(); }
+
+    function buildSetLink(code){
+      const url = new URL('set.html', location.href);
+      url.searchParams.set('code', code);
+      return url.toString();
+    }
+
+    function variantKey(row){
+      const name = (row["Card Name"] || row.name || "").trim().toLowerCase();
+      const num  = String(row["Collector No"] || row.number || "").trim().toLowerCase();
+      const fin  = (row["Finish"] || row.finish || "").trim().toLowerCase();
+      const varLabel = (row["Variant"] || row.variant || "Standard").trim().toLowerCase();
+      return [name,num,fin,varLabel].join("|");
+    }
+
+    function rowToObj(row){
+      // Uses the columns from your sheet script
+      const obj = {
+        name: row["Card Name"] || "",
+        set: row["Set Code"] || "",
+        setName: row["Set Name"] || "",
+        number: String(row["Collector No"] || "").trim(),
+        type: row["Type Line"] || "",
+        colourId: row["Color Identity"] || "",
+        rarity: row["Rarity"] || "",
+        finish: (row["Finish"] || "").toString().toLowerCase(),
+        variant: row["Variant"] || "Standard",
+        usd: parseFloat(row["Scryfall USD"] || "0") || 0,
+        price: parseFloat(row["Sell Price (AUD, +10%)"] || row["Market AUD"] || "0") || 0,
+        stock: parseInt(row["Qty Owned"] || "0",10) || 0,
+        scryId: row["Scryfall ID"] || "",
+        sku: row["SKU"] || ""
+      };
+      return obj;
+    }
+
+    async function fetchSetRows(setCode){
+      const url = `${CARDS_API_BASE}?cards=1&set=${encodeURIComponent(setCode)}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("Failed loading set rows");
+      const j = await res.json();
+      const rows = Array.isArray(j) ? j : (j.rows || j.data || []);
+      return rows.map(rowToObj);
+    }
+
+    async function fetchScryfallCard(setCode, number, name){
+      let url;
+      if(number){
+        url = `https://api.scryfall.com/cards/search?q=set:${encodeURIComponent(setCode)}+cn:${encodeURIComponent(number)}&unique=prints&order=set`;
+      }else{
+        // exact name within set (quotes to prefer exact match)
+        url = `https://api.scryfall.com/cards/search?q=set:${encodeURIComponent(setCode)}+!"${encodeURIComponent(name)}"&unique=prints&order=set`;
+      }
+      const res = await fetch(url);
+      if(!res.ok) throw new Error(`Scryfall HTTP ${res.status}`);
+      const j = await res.json();
+      if(!j.data || !j.data.length) throw new Error("Card not found on Scryfall");
+      // pick the first print (or the one that matches finish/variant later)
+      return j.data[0];
+    }
+
+    function setupImageFlip(card){
+      const imgEl = qsel("#cardImg");
+      const flipBtn = qsel("#flipBtn");
+
+      let faceIndex = 0;
+      let faces = [];
+
+      if(card.image_uris){
+        faces = [card.image_uris.normal];
+      }else if(card.card_faces && card.card_faces.length){
+        faces = card.card_faces.map(f => f.image_uris && (f.image_uris.normal || f.image_uris.large)).filter(Boolean);
+      }
+      if(!faces.length) return;
+
+      imgEl.src = faces[0];
+      if(faces.length > 1){
+        flipBtn.style.display = "inline-block";
+        flipBtn.onclick = () => {
+          faceIndex = (faceIndex + 1) % faces.length;
+          imgEl.src = faces[faceIndex];
+        };
+      }else{
+        flipBtn.style.display = "none";
+      }
+    }
+
+    function oracleTextFrom(card){
+      if(card.oracle_text) return card.oracle_text;
+      if(card.card_faces && card.card_faces.length){
+        return card.card_faces.map(f => `• ${f.name}\n${f.type_line}\n${f.oracle_text || ""}`).join("\n\n");
+      }
+      return "(No rules text available)";
+    }
+
+    function linkToSelf(params){
+      const url = new URL(location.href);
+      url.search = ""; // reset
+      for(const [k,v] of Object.entries(params)) if(v!=null && v!=="") url.searchParams.set(k, v);
+      return url.toString();
+    }
+
+    function addToCart(){
+      // placeholder hook
+      const qty = parseInt(qsel("#qty").value,10)||1;
+      alert(`Added ${qty} to cart (placeholder).`);
+    }
+
+    /* ---------- INIT ---------- */
+    (async function init(){
+      const p = new URLSearchParams(location.search);
+      const setCode = (p.get("code")||"").trim().toLowerCase();
+      const number  = (p.get("number")||"").trim();
+      const nameQP  = p.get("name") ? decodeURIComponent(p.get("name")) : "";
+
+      if(!setCode){
+        qsel(".container").innerHTML = "<p>Missing ?code=SETCODE</p>";
+        return;
+      }
+      qsel("#setLink").href = buildSetLink(setCode);
+
+      try{
+        // load sheets rows and scryfall card
+        const [rows, card] = await Promise.all([
+          fetchSetRows(setCode),
+          fetchScryfallCard(setCode, number, nameQP)
+        ]);
+
+        // Pick the primary row: try matching collector#, then (name + optional finish/variant)
+        const finishQP  = (p.get("finish")||"").toLowerCase();
+        const variantQP = (p.get("variant")||"");
+        let primary = null;
+
+        if(number){
+          primary = rows.find(r => up(r.number) === up(number)) || null;
+        }
+        if(!primary && nameQP){
+          const nameMatches = rows.filter(r => r.name.toLowerCase() === nameQP.toLowerCase());
+          if(finishQP){
+            primary = nameMatches.find(r => r.finish.toLowerCase() === finishQP) || nameMatches[0] || null;
+          }else if(variantQP){
+            primary = nameMatches.find(r => r.variant.toLowerCase() === variantQP.toLowerCase()) || nameMatches[0] || null;
+          }else{
+            primary = nameMatches[0] || null;
+          }
+        }
+        // Fallback: try match by Scryfall id if present
+        if(!primary && card && card.id){
+          primary = rows.find(r => r.scryId && r.scryId === card.id) || null;
+        }
+
+        // Render header/meta
+        const displayName = primary?.name || card.name || nameQP || "Card";
+        const setName = primary?.setName || card.set_name || setCode.toUpperCase();
+        const collNo = primary?.number || card.collector_number || number || "";
+
+        document.title = `${displayName} – DeckDen`;
+        qsel("#cardTitle").textContent = displayName;
+        qsel("#cardMeta").textContent = `${setName} • #${collNo} • ${primary?.finish ? (primary.finish.charAt(0).toUpperCase()+primary.finish.slice(1)) : ''} ${primary?.variant && primary.variant!=="Standard" ? "• " + primary.variant : ""}`.trim();
+
+        // Price / stock
+        const priceAUD = primary?.price || 0;
+        const stock = primary?.stock ?? 0;
+        qsel("#cardPrice").textContent = priceAUD ? money(priceAUD) : "";
+        qsel("#cardStock").innerHTML = stock>0 ? `<span class="badge">In stock: ${stock}</span>` : `<span class="badge">Out of stock</span>`;
+        qsel("#qty").max = Math.max(stock, 1);
+
+        // Images & rules
+        setupImageFlip(card);
+        qsel("#rules").textContent = oracleTextFrom(card);
+        qsel("#scryLink").href = card.scryfall_uri || card.uri || "#";
+
+        // Variants list (same name, different finish/variant), only in-stock
+        const sameName = (primary ? primary.name : (nameQP || card.name)).toLowerCase();
+        const variants = rows
+          .filter(r => r.name.toLowerCase() === sameName)
+          .filter(r => !(up(r.number) === up(collNo) && r.finish === primary?.finish && r.variant === primary?.variant))
+          .filter(r => (r.stock||0) > 0)
+          .sort((a,b)=> (a.price||0) - (b.price||0));
+
+        const vb = qsel("#variantsBody");
+        if(!variants.length){
+          vb.innerHTML = `<tr><td colspan="6" style="color:var(--muted);padding:14px">No other variants currently in stock.</td></tr>`;
+        }else{
+          vb.innerHTML = variants.map(r=>{
+            const link = linkToSelf({ code:setCode, number:r.number, name:encodeURIComponent(r.name), finish:r.finish, variant:r.variant });
+            return `<tr>
+              <td>${r.number}</td>
+              <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
+              <td>${r.variant}</td>
+              <td>${money(r.price)}</td>
+              <td>${r.stock}</td>
+              <td><a href="${link}">View</a></td>
+            </tr>`;
+          }).join("");
+        }
+
+      }catch(err){
+        console.error(err);
+        qsel(".container").innerHTML = `<p style="color:var(--muted)">Failed to load this card. Check the URL parameters (code, number/name).</p>`;
+      }
+    })();
+  </script>
+</body>
+</html>
