@@ -61,9 +61,20 @@
     th .sort{margin-left:6px;opacity:.6}
     tr:hover td{background:rgba(0,0,0,.02)}
     .name-cell{font-weight:600}
-    .subline{font-size:.85rem;color:var(--muted)}
     .no-results{padding:24px;text-align:center;color:var(--muted)}
     .divider{height:1px;background:var(--line-strong);margin:8px 0}
+
+    /* Pagination footer */
+    .pager{
+      display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:12px;flex-wrap:wrap
+    }
+    .pager .left, .pager .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .pager .btn{
+      background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer
+    }
+    .pager .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .pager .info{color:var(--muted);font-size:.9rem}
+    .pager select{border:1px solid var(--line);background:var(--chip);padding:6px 8px;border-radius:8px;color:var(--text)}
 
     /* Responsive */
     @media (max-width: 900px){
@@ -154,6 +165,23 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination footer -->
+    <div class="pager">
+      <div class="left">
+        <button id="prevBtn" class="btn">Prev</button>
+        <button id="nextBtn" class="btn">Next</button>
+        <span class="info" id="pageInfo">Page 1 of 1</span>
+      </div>
+      <div class="right">
+        <label class="info" for="pageSize">Rows per page</label>
+        <select id="pageSize">
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -162,8 +190,6 @@
        ----------------------------- */
     const CARDS_API_BASE = "https://script.google.com/macros/s/AKfycbyakGYRw-vHJKd4RkkoBwVCyjxVHSMomxHWcXDl-mahuKFoPrpt6YJS0xBl1Cn47hGm/exec";
     // This page requests:  ?cards=1&set=FIN
-    // Expected JSON rows with headers from your sheet:
-    // "Card Name","Collector No","Sell Price (AUD, +10%)","Market AUD","Color Identity","Type Line","Rarity","Finish","Variant","Qty Owned"
 
     /* -----------------------------
        THEME
@@ -172,7 +198,7 @@
     document.getElementById('qsHeader').addEventListener('input', (e)=>{
       document.getElementById('q').value = e.target.value;
       state.filters.q = e.target.value;
-      applyFiltersAndRender();
+      resetToFirstPageAndRender();
     });
 
     /* -----------------------------
@@ -184,7 +210,9 @@
       raw: [],
       view: [],
       sort: { key: 'name', dir: 'asc' },
-      filters: { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false }
+      filters: { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false },
+      page: 1,
+      pageSize: 20
     };
 
     /* -----------------------------
@@ -221,7 +249,7 @@
     /* -----------------------------
        RENDER
        ----------------------------- */
-    function renderFiltersFromData(fullRows){  // <-- always from FULL data
+    function renderFiltersFromData(fullRows){
       const typeSel = document.getElementById('typeFilter');
       const finishSel = document.getElementById('finishFilter');
       const raritySel = document.getElementById('rarityFilter');
@@ -247,9 +275,16 @@
       const tb = document.getElementById('tbody');
       if(state.view.length===0){
         tb.innerHTML = `<tr><td colspan="9" class="no-results">No cards match your filters.</td></tr>`;
+        updatePager();
         return;
       }
-      const rowsHtml = state.view.map(r => `
+
+      // Pagination slice
+      const start = (state.page - 1) * state.pageSize;
+      const end = start + state.pageSize;
+      const pageRows = state.view.slice(start, end);
+
+      const rowsHtml = pageRows.map(r => `
         <tr>
           <td class="name-cell"><a href="card.html?code=${encodeURIComponent(state.setCode)}&number=${encodeURIComponent(r.number)}&name=${encodeURIComponent(r.name)}&finish=${encodeURIComponent(r.finish)}&variant=${encodeURIComponent(r.variant)}">${r.name}</a></td>
           <td>${r.number || ''}</td>
@@ -263,23 +298,33 @@
         </tr>
       `).join('');
       tb.innerHTML = rowsHtml;
+
+      updatePager();
+    }
+
+    function updatePager(){
+      const total = state.view.length;
+      const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+      if(state.page > totalPages) state.page = totalPages;
+
+      document.getElementById('pageInfo').textContent = `Page ${totalPages ? state.page : 1} of ${totalPages}`;
+      document.getElementById('prevBtn').disabled = (state.page <= 1);
+      document.getElementById('nextBtn').disabled = (state.page >= totalPages);
     }
 
     /* -----------------------------
-       FILTER + SORT
+       FILTER + SORT + PAGINATION
        ----------------------------- */
-    function applyFiltersAndRender(){
+    function applyFiltersAndSort(){
       const f = state.filters;
       const q = f.q.trim().toLowerCase();
 
-      // Start from ALL rows, and only filter stock when checkbox is on
       let v = state.raw.filter(r => {
-        if(f.inStock && !(r.stock>0)) return false;         // <-- only filter stock when requested
+        if(f.inStock && !(r.stock>0)) return false;
         if(f.type && r.type !== f.type) return false;
         if(f.finish && (r.finish.charAt(0).toUpperCase()+r.finish.slice(1)) !== f.finish) return false;
         if(f.rarity && (r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1)) !== f.rarity) return false;
         if(f.variant && r.variant !== f.variant) return false;
-
         if(q){
           const hay = (r.name+" "+r.type+" "+r.variant+" "+r.number).toLowerCase();
           if(!hay.includes(q)) return false;
@@ -304,16 +349,21 @@
       });
 
       state.view = v;
+    }
+
+    function resetToFirstPageAndRender(){
+      state.page = 1;
+      applyFiltersAndSort();
       renderTable();
     }
 
     function attachEvents(){
-      document.getElementById('q').addEventListener('input', e => { state.filters.q = e.target.value; applyFiltersAndRender(); });
-      document.getElementById('typeFilter').addEventListener('change', e => { state.filters.type = e.target.value; applyFiltersAndRender(); });
-      document.getElementById('finishFilter').addEventListener('change', e => { state.filters.finish = e.target.value; applyFiltersAndRender(); });
-      document.getElementById('rarityFilter').addEventListener('change', e => { state.filters.rarity = e.target.value; applyFiltersAndRender(); });
-      document.getElementById('variantFilter').addEventListener('change', e => { state.filters.variant = e.target.value; applyFiltersAndRender(); });
-      document.getElementById('inStock').addEventListener('change', e => { state.filters.inStock = e.target.checked; applyFiltersAndRender(); });
+      document.getElementById('q').addEventListener('input', e => { state.filters.q = e.target.value; resetToFirstPageAndRender(); });
+      document.getElementById('typeFilter').addEventListener('change', e => { state.filters.type = e.target.value; resetToFirstPageAndRender(); });
+      document.getElementById('finishFilter').addEventListener('change', e => { state.filters.finish = e.target.value; resetToFirstPageAndRender(); });
+      document.getElementById('rarityFilter').addEventListener('change', e => { state.filters.rarity = e.target.value; resetToFirstPageAndRender(); });
+      document.getElementById('variantFilter').addEventListener('change', e => { state.filters.variant = e.target.value; resetToFirstPageAndRender(); });
+      document.getElementById('inStock').addEventListener('change', e => { state.filters.inStock = e.target.checked; resetToFirstPageAndRender(); });
       document.getElementById('clearFilters').addEventListener('click', ()=>{
         state.filters = { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false };
         document.getElementById('q').value = '';
@@ -323,7 +373,7 @@
         document.getElementById('rarityFilter').value = '';
         document.getElementById('variantFilter').value = '';
         document.getElementById('inStock').checked = false;
-        applyFiltersAndRender();
+        resetToFirstPageAndRender();
       });
 
       // header sorters
@@ -335,8 +385,25 @@
           }else{
             state.sort.key = k; state.sort.dir = 'asc';
           }
-          applyFiltersAndRender();
+          resetToFirstPageAndRender();
         });
+      });
+
+      // pager buttons
+      document.getElementById('prevBtn').addEventListener('click', ()=>{
+        if(state.page > 1){ state.page--; renderTable(); }
+      });
+      document.getElementById('nextBtn').addEventListener('click', ()=>{
+        const totalPages = Math.max(1, Math.ceil(state.view.length / state.pageSize));
+        if(state.page < totalPages){ state.page++; renderTable(); }
+      });
+
+      // page size
+      const ps = document.getElementById('pageSize');
+      ps.addEventListener('change', ()=>{
+        state.pageSize = parseInt(ps.value, 10) || 20;
+        state.page = 1;
+        renderTable();
       });
     }
 
@@ -358,24 +425,24 @@
       const params = new URLSearchParams(location.search);
       state.setCode = (params.get('code') || '').trim().toLowerCase();
       state.setName = params.get('name') || state.setCode || 'Set';
-
       document.getElementById('setTitle').textContent = state.setName || 'Set';
 
       if(!state.setCode){
         document.getElementById('tbody').innerHTML = `<tr><td colspan="9" class="no-results">Missing ?code=SETCODE</td></tr>`;
+        updatePager();
         return;
       }
 
       try{
         state.raw = await fetchCards(state.setCode);
-        // Always build dropdowns from the FULL dataset so options never “disappear”
-        renderFiltersFromData(state.raw);
-        // Start with everything visible (including stock = 0)
-        state.view = state.raw.slice();
-        applyFiltersAndRender();
+        renderFiltersFromData(state.raw);      // from FULL dataset
+        state.page = 1;                        // reset pager
+        applyFiltersAndSort();
+        renderTable();
       }catch(err){
         console.error(err);
         document.getElementById('tbody').innerHTML = `<tr><td colspan="9" class="no-results">Failed to load cards for ${state.setCode}.</td></tr>`;
+        updatePager();
       }
     }
 
@@ -383,6 +450,7 @@
   </script>
 </body>
 </html>
+
 
 
 
