@@ -20,7 +20,7 @@
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;transition:background .25s,color .25s}
-    a{color:inherit}
+    a{color:inherit;text-decoration:none}
 
     /* Header */
     nav{
@@ -30,7 +30,7 @@
     .nav-left{display:flex;align-items:center;gap:10px}
     .nav-left img{width:34px;height:34px;object-fit:contain;cursor:pointer}
     .nav-links{display:flex;gap:12px}
-    .nav-links a{color:#fff;text-decoration:none;font-weight:600;opacity:.95}
+    .nav-links a{color:#fff;font-weight:600;opacity:.95}
     .nav-links a:hover{opacity:1}
     .nav-right{display:flex;align-items:center;gap:10px}
     .nav-right input[type="search"]{display:none}
@@ -51,27 +51,41 @@
     .chip input[type="checkbox"]{transform:translateY(1px)}
     .clear-btn{margin-left:auto;background:transparent;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:8px 10px;cursor:pointer}
     .clear-btn:hover{border-color:var(--muted);color:var(--text)}
+    .divider{height:1px;background:var(--line-strong);margin:8px 0}
 
     /* Table */
     .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
     table{width:100%;border-collapse:collapse}
     thead{background:linear-gradient(to bottom, rgba(0,0,0,.06), rgba(0,0,0,0))}
-    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
     th{font-size:.85rem;color:var(--muted);user-select:none;cursor:pointer;white-space:nowrap}
     th .sort{margin-left:6px;opacity:.6}
     tr:hover td{background:rgba(0,0,0,.02)}
     .name-cell{font-weight:600}
     .no-results{padding:24px;text-align:center;color:var(--muted)}
-    .divider{height:1px;background:var(--line-strong);margin:8px 0}
+
+    /* Mana icons */
+    .mana{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);font-size:.75rem;font-weight:700;margin-right:4px}
+    .mana.W{background:#fff;color:#111}
+    .mana.U{background:#4aa3ff;color:#fff}
+    .mana.B{background:#111;color:#fff}
+    .mana.R{background:#e23a2e;color:#fff}
+    .mana.G{background:#2e8b57;color:#fff}
+    .mana.C{background:#aaa;color:#fff}
+    .mana-wrap{display:flex;align-items:center;gap:2px}
+
+    /* Buttons */
+    .btn{
+      background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer;white-space:nowrap
+    }
+    .btn:hover{border-color:var(--muted)}
+    .btn.cart{display:inline-flex;align-items:center;gap:6px}
 
     /* Pagination footer */
     .pager{
       display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:12px;flex-wrap:wrap
     }
     .pager .left, .pager .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .pager .btn{
-      background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer
-    }
     .pager .btn[disabled]{opacity:.5;cursor:not-allowed}
     .pager .info{color:var(--muted);font-size:.9rem}
     .pager select{border:1px solid var(--line);background:var(--chip);padding:6px 8px;border-radius:8px;color:var(--text)}
@@ -79,8 +93,7 @@
     /* Responsive */
     @media (max-width: 900px){
       .nav-links{display:none}
-      .row{gap:8px}
-      th:nth-child(6), td:nth-child(6){display:none} /* Type line on narrow */
+      th:nth-child(6), td:nth-child(6){display:none} /* Type on narrow */
       th:nth-child(8), td:nth-child(8){display:none} /* Variant on narrow */
     }
     @media (max-width: 640px){
@@ -149,19 +162,20 @@
       <table id="cardsTable" aria-describedby="setTitle">
         <thead>
           <tr>
+            <th data-key="price">Price (AUD) <span class="sort">↕</span></th>
             <th data-key="name">Name <span class="sort">↕</span></th>
             <th data-key="number"># <span class="sort">↕</span></th>
-            <th data-key="price">Price (AUD) <span class="sort">↕</span></th>
             <th data-key="finish">Finish <span class="sort">↕</span></th>
-            <th data-key="colour">Colour <span class="sort">↕</span></th>
+            <th>Colour</th>
             <th data-key="type">Type <span class="sort">↕</span></th>
             <th data-key="rarity">Rarity <span class="sort">↕</span></th>
             <th data-key="variant">Variant <span class="sort">↕</span></th>
             <th data-key="stock">Stock <span class="sort">↕</span></th>
+            <th><!-- Cart --></th>
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="9" class="no-results">Loading cards…</td></tr>
+          <tr><td colspan="10" class="no-results">Loading cards…</td></tr>
         </tbody>
       </table>
     </div>
@@ -188,8 +202,7 @@
     /* -----------------------------
        CONFIG: your Web App
        ----------------------------- */
-    const CARDS_API_BASE = "https://script.google.com/macros/s/AKfycbyakGYRw-vHJKd4RkkoBwVCyjxVHSMomxHWcXDl-mahuKFoPrpt6YJS0xBl1Cn47hGm/exec";
-    // This page requests:  ?cards=1&set=FIN
+    const CARDS_API_BASE = "https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec";
 
     /* -----------------------------
        THEME
@@ -209,7 +222,7 @@
       setName: null,
       raw: [],
       view: [],
-      sort: { key: 'name', dir: 'asc' },
+      sort: { key: 'price', dir: 'asc' }, // start by price since it's first
       filters: { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false },
       page: 1,
       pageSize: 20
@@ -219,10 +232,16 @@
        UTILITIES
        ----------------------------- */
     function parseColourId(ci){
-      if(!ci) return "Colorless";
-      const map = { W:"White", U:"Blue", B:"Black", R:"Red", G:"Green", C:"Colorless" };
-      const parts = String(ci).split(',').filter(Boolean);
-      return parts.length ? parts.map(x => map[x] || x).join('/') : "Colorless";
+      const parts = String(ci||"").split(',').filter(Boolean);
+      return parts.length ? parts : ["C"];
+    }
+    function manaIcon(letter){
+      const L = (letter||"C").toUpperCase();
+      return `<span class="mana ${L}" title="${L}">${L}</span>`;
+    }
+    function manaIcons(ci){
+      const arr = parseColourId(ci);
+      return `<span class="mana-wrap">${arr.map(manaIcon).join("")}</span>`;
     }
     function typeBucket(typeLine){
       if(!typeLine) return "";
@@ -235,13 +254,13 @@
       const name = row["Card Name"] || row.name || "";
       const number = String(row["Collector No"] || row["Collector Number"] || row.number || "").trim();
       const price = parseFloat(row["Sell Price (AUD, +10%)"] || row["Market AUD"] || row.price || "0") || 0;
-      const colour = parseColourId(row["Color Identity"] || row["Colour Identity"] || row.colour || "");
+      const colourId = row["Color Identity"] || row["Colour Identity"] || row.colour || "";
       const type = typeBucket(row["Type Line"] || row.type || "");
       const rarity = (row["Rarity"] || row.rarity || "").toString().toLowerCase();
       const finish = (row["Finish"] || row.finish || "").toString().toLowerCase();
       const variant = row["Variant"] || row.variant || "Standard";
       const stock = parseInt(row["Qty Owned"] || row["Quantity Owned"] || row.stock || "0", 10) || 0;
-      return { name, number, price, colour, type, rarity, finish, variant, stock, _raw: row };
+      return { name, number, price, colourId, type, rarity, finish, variant, stock, _raw: row };
     }
     function uniqueSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
     function formatPrice(n){ return n>0 ? `$${n.toFixed(2)}` : ""; }
@@ -274,27 +293,27 @@
     function renderTable(){
       const tb = document.getElementById('tbody');
       if(state.view.length===0){
-        tb.innerHTML = `<tr><td colspan="9" class="no-results">No cards match your filters.</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="10" class="no-results">No cards match your filters.</td></tr>`;
         updatePager();
         return;
       }
 
-      // Pagination slice
       const start = (state.page - 1) * state.pageSize;
       const end = start + state.pageSize;
       const pageRows = state.view.slice(start, end);
 
       const rowsHtml = pageRows.map(r => `
         <tr>
+          <td>${formatPrice(r.price)}</td>
           <td class="name-cell"><a href="card.html?code=${encodeURIComponent(state.setCode)}&number=${encodeURIComponent(r.number)}&name=${encodeURIComponent(r.name)}&finish=${encodeURIComponent(r.finish)}&variant=${encodeURIComponent(r.variant)}">${r.name}</a></td>
           <td>${r.number || ''}</td>
-          <td>${formatPrice(r.price)}</td>
           <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
-          <td>${r.colour}</td>
+          <td>${manaIcons(r.colourId)}</td>
           <td>${r.type}</td>
           <td>${r.rarity ? r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1) : ''}</td>
           <td>${r.variant}</td>
           <td>${r.stock}</td>
+          <td><button class="btn cart" onclick='addToCart(${JSON.stringify({n:""+r.name,no:""+r.number,f:""+r.finish,v:""+r.variant}).replace(/"/g,"&quot;")})'><i class="fa-solid fa-cart-plus"></i> Add</button></td>
         </tr>
       `).join('');
       tb.innerHTML = rowsHtml;
@@ -306,7 +325,6 @@
       const total = state.view.length;
       const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
       if(state.page > totalPages) state.page = totalPages;
-
       document.getElementById('pageInfo').textContent = `Page ${totalPages ? state.page : 1} of ${totalPages}`;
       document.getElementById('prevBtn').disabled = (state.page <= 1);
       document.getElementById('nextBtn').disabled = (state.page >= totalPages);
@@ -332,7 +350,6 @@
         return true;
       });
 
-      // sort
       const { key, dir } = state.sort;
       const mul = dir === 'asc' ? 1 : -1;
       v.sort((a,b)=>{
@@ -408,6 +425,14 @@
     }
 
     /* -----------------------------
+       CART (placeholder)
+       ----------------------------- */
+    function addToCart(info){
+      // Stand-in; replace with your real cart logic later
+      alert(`Added to cart:\n${info.n} #${info.no}\n${info.f} • ${info.v}`);
+    }
+
+    /* -----------------------------
        DATA LOADING
        ----------------------------- */
     async function fetchCards(setCode){
@@ -428,20 +453,20 @@
       document.getElementById('setTitle').textContent = state.setName || 'Set';
 
       if(!state.setCode){
-        document.getElementById('tbody').innerHTML = `<tr><td colspan="9" class="no-results">Missing ?code=SETCODE</td></tr>`;
+        document.getElementById('tbody').innerHTML = `<tr><td colspan="10" class="no-results">Missing ?code=SETCODE</td></tr>`;
         updatePager();
         return;
       }
 
       try{
         state.raw = await fetchCards(state.setCode);
-        renderFiltersFromData(state.raw);      // from FULL dataset
-        state.page = 1;                        // reset pager
+        renderFiltersFromData(state.raw);
+        state.page = 1;
         applyFiltersAndSort();
         renderTable();
       }catch(err){
         console.error(err);
-        document.getElementById('tbody').innerHTML = `<tr><td colspan="9" class="no-results">Failed to load cards for ${state.setCode}.</td></tr>`;
+        document.getElementById('tbody').innerHTML = `<tr><td colspan="10" class="no-results">Failed to load cards for ${state.setCode}.</td></tr>`;
         updatePager();
       }
     }
@@ -450,7 +475,3 @@
   </script>
 </body>
 </html>
-
-
-
-
