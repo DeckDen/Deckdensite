@@ -9,12 +9,14 @@
     :root{
       --bg:#ffffff; --text:#222; --muted:#666;
       --accent:#b84e00; /* darker orange */
+      --accent-press:#944000;
       --card:#fff; --line:#e8e8e8; --line-strong:#000;
       --chip:#f5f5f5;
     }
     .dark-mode{
       --bg:#121212; --text:#f1f1f1; --muted:#c7c7c7;
       --accent:#b84e00;
+      --accent-press:#944000;
       --card:#1b1b1b; --line:#2a2a2a; --line-strong:#fff;
       --chip:#1f1f1f;
     }
@@ -79,7 +81,13 @@
       background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer;white-space:nowrap
     }
     .btn:hover{border-color:var(--muted)}
-    .btn.cart{display:inline-flex;align-items:center;gap:6px}
+    .btn.cart{
+      background:var(--accent);
+      border-color:transparent;
+      color:#fff;
+      display:inline-flex;align-items:center;gap:6px
+    }
+    .btn.cart:hover{background:var(--accent-press)}
 
     /* Pagination footer */
     .pager{
@@ -93,11 +101,12 @@
     /* Responsive */
     @media (max-width: 900px){
       .nav-links{display:none}
-      th:nth-child(6), td:nth-child(6){display:none} /* Type on narrow */
-      th:nth-child(8), td:nth-child(8){display:none} /* Variant on narrow */
+      th:nth-child(3), td:nth-child(3){display:none} /* Type on narrow */
+      th:nth-child(4), td:nth-child(4){display:none} /* Colour on narrow */
+      th:nth-child(6), td:nth-child(6){display:none} /* Variant on narrow */
     }
     @media (max-width: 640px){
-      th:nth-child(5), td:nth-child(5){display:none} /* Colour on very narrow */
+      th:nth-child(5), td:nth-child(5){display:none} /* Rarity very narrow */
       .controls .row .chip label{display:none}
       .nav-right input[type="search"]{display:block;width:150px;padding:6px 8px;border-radius:8px;border:none}
     }
@@ -162,14 +171,14 @@
       <table id="cardsTable" aria-describedby="setTitle">
         <thead>
           <tr>
-            <th data-key="price">Price (AUD) <span class="sort">↕</span></th>
-            <th data-key="name">Name <span class="sort">↕</span></th>
             <th data-key="number"># <span class="sort">↕</span></th>
-            <th data-key="finish">Finish <span class="sort">↕</span></th>
-            <th>Colour</th>
+            <th data-key="name">Name <span class="sort">↕</span></th>
             <th data-key="type">Type <span class="sort">↕</span></th>
+            <th data-key="colourSort">Colour <span class="sort">↕</span></th>
             <th data-key="rarity">Rarity <span class="sort">↕</span></th>
             <th data-key="variant">Variant <span class="sort">↕</span></th>
+            <th data-key="finish">Finish <span class="sort">↕</span></th>
+            <th data-key="price">Price (AUD) <span class="sort">↕</span></th>
             <th data-key="stock">Stock <span class="sort">↕</span></th>
             <th><!-- Cart --></th>
           </tr>
@@ -202,7 +211,7 @@
     /* -----------------------------
        CONFIG: your Web App
        ----------------------------- */
-    const CARDS_API_BASE = "https://script.google.com/macros/s/AKfycbyakGYRw-vHJKd4RkkoBwVCyjxVHSMomxHWcXDl-mahuKFoPrpt6YJS0xBl1Cn47hGm/exec";
+    const CARDS_API_BASE = "https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec";
 
     /* -----------------------------
        THEME
@@ -222,7 +231,7 @@
       setName: null,
       raw: [],
       view: [],
-      sort: { key: 'price', dir: 'asc' }, // start by price since it's first
+      sort: { key: 'number', dir: 'asc' }, // default sort as requested
       filters: { q:'', type:'', finish:'', rarity:'', variant:'', inStock:false },
       page: 1,
       pageSize: 20
@@ -231,6 +240,13 @@
     /* -----------------------------
        UTILITIES
        ----------------------------- */
+    function colourOrderKey(ciLetters){
+      // Sort order for MTG colours: W U B R G (then C)
+      const order = {W:1,U:2,B:3,R:4,G:5,C:6};
+      const parts = (ciLetters||["C"]);
+      const mapped = parts.map(x => order[x] || 9).sort((a,b)=>a-b).join("-");
+      return mapped;
+    }
     function parseColourId(ci){
       const parts = String(ci||"").split(',').filter(Boolean);
       return parts.length ? parts : ["C"];
@@ -260,10 +276,14 @@
       const finish = (row["Finish"] || row.finish || "").toString().toLowerCase();
       const variant = row["Variant"] || row.variant || "Standard";
       const stock = parseInt(row["Qty Owned"] || row["Quantity Owned"] || row.stock || "0", 10) || 0;
-      return { name, number, price, colourId, type, rarity, finish, variant, stock, _raw: row };
+
+      // helpers for sort
+      const ciLetters = parseColourId(colourId);
+      const colourSort = colourOrderKey(ciLetters); // numeric key W/U/B/R/G/C
+      return { name, number, price, colourId, colourSort, type, rarity, finish, variant, stock, _raw: row };
     }
     function uniqueSorted(arr){ return [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
-    function formatPrice(n){ return n>0 ? `$${n.toFixed(2)}` : ""; }
+    function formatPrice(n){ return n>0 ? `$${Number(n).toFixed(0)}` : ""; } // show whole dollars as per rounding
 
     /* -----------------------------
        RENDER
@@ -279,14 +299,15 @@
       const rarities = uniqueSorted(fullRows.map(r=>r.rarity));
       const variants = uniqueSorted(fullRows.map(r=>r.variant));
 
+      function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
       function fillSelect(sel, items, label){
         const keep = sel.value;
-        sel.innerHTML = `<option value="">All ${label}</option>` + items.map(v=>`<option value="${v}">${v}</option>`).join('');
+        sel.innerHTML = `<option value="">All ${label}</option>` + items.map(v=>`<option value="${v}">${cap(v)}</option>`).join('');
         if(items.includes(keep)) sel.value = keep;
       }
       fillSelect(typeSel, types, "Types");
-      fillSelect(finishSel, finishes.map(f=>f.charAt(0).toUpperCase()+f.slice(1)), "Finishes");
-      fillSelect(raritySel, rarities.map(r=>r.charAt(0).toUpperCase()+r.slice(1)), "Rarities");
+      fillSelect(finishSel, finishes, "Finishes");
+      fillSelect(raritySel, rarities, "Rarities");
       fillSelect(variantSel, variants, "Variants");
     }
 
@@ -304,14 +325,14 @@
 
       const rowsHtml = pageRows.map(r => `
         <tr>
-          <td>${formatPrice(r.price)}</td>
-          <td class="name-cell"><a href="card.html?code=${encodeURIComponent(state.setCode)}&number=${encodeURIComponent(r.number)}&name=${encodeURIComponent(r.name)}&finish=${encodeURIComponent(r.finish)}&variant=${encodeURIComponent(r.variant)}">${r.name}</a></td>
           <td>${r.number || ''}</td>
-          <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
-          <td>${manaIcons(r.colourId)}</td>
+          <td class="name-cell"><a href="card.html?code=${encodeURIComponent(state.setCode)}&number=${encodeURIComponent(r.number)}&name=${encodeURIComponent(r.name)}&finish=${encodeURIComponent(r.finish)}&variant=${encodeURIComponent(r.variant)}">${r.name}</a></td>
           <td>${r.type}</td>
+          <td>${manaIcons(r.colourId)}</td>
           <td>${r.rarity ? r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1) : ''}</td>
           <td>${r.variant}</td>
+          <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
+          <td>${formatPrice(r.price)}</td>
           <td>${r.stock}</td>
           <td><button class="btn cart" onclick='addToCart(${JSON.stringify({n:""+r.name,no:""+r.number,f:""+r.finish,v:""+r.variant}).replace(/"/g,"&quot;")})'><i class="fa-solid fa-cart-plus"></i> Add</button></td>
         </tr>
@@ -340,8 +361,8 @@
       let v = state.raw.filter(r => {
         if(f.inStock && !(r.stock>0)) return false;
         if(f.type && r.type !== f.type) return false;
-        if(f.finish && (r.finish.charAt(0).toUpperCase()+r.finish.slice(1)) !== f.finish) return false;
-        if(f.rarity && (r.rarity.charAt(0).toUpperCase()+r.rarity.slice(1)) !== f.rarity) return false;
+        if(f.finish && r.finish !== f.finish.toLowerCase()) return false;
+        if(f.rarity && r.rarity !== f.rarity.toLowerCase()) return false;
         if(f.variant && r.variant !== f.variant) return false;
         if(q){
           const hay = (r.name+" "+r.type+" "+r.variant+" "+r.number).toLowerCase();
@@ -362,6 +383,7 @@
           if(an!==bn) return (an-bn)*mul;
           return String(A).localeCompare(String(B)) * mul;
         }
+        if(key === 'colourSort'){ return (a.colourSort.localeCompare(b.colourSort))*mul; }
         return String(A).localeCompare(String(B)) * mul;
       });
 
@@ -422,13 +444,17 @@
         state.page = 1;
         renderTable();
       });
+
+      // header quick search pipes into main search
+      document.getElementById('qsHeader').addEventListener('keydown', e=>{
+        if(e.key === 'Enter'){ e.preventDefault(); }
+      });
     }
 
     /* -----------------------------
        CART (placeholder)
        ----------------------------- */
     function addToCart(info){
-      // Stand-in; replace with your real cart logic later
       alert(`Added to cart:\n${info.n} #${info.no}\n${info.f} • ${info.v}`);
     }
 
@@ -475,4 +501,10 @@
   </script>
 </body>
 </html>
+
+    init();
+  </script>
+</body>
+</html>
+
 
