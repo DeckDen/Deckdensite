@@ -8,366 +8,359 @@
   <style>
     :root{
       --bg:#ffffff; --text:#222; --muted:#666;
-      --accent:#b84e00; /* darker orange */
-      --card:#fff; --line:#e8e8e8; --line-strong:#000;
-      --chip:#f5f5f5;
+      --accent:#b84e00; --accent-press:#944000;
+      --card:#fff; --line:#e8e8e8; --chip:#f5f5f5;
     }
     .dark-mode{
       --bg:#121212; --text:#f1f1f1; --muted:#c7c7c7;
-      --accent:#b84e00;
-      --card:#1b1b1b; --line:#2a2a2a; --line-strong:#fff;
-      --chip:#1f1f1f;
+      --accent:#b84e00; --accent-press:#944000;
+      --card:#1b1b1b; --line:#2a2a2a; --chip:#1f1f1f;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;transition:background .25s,color .25s}
-    a{color:inherit}
+    a{color:inherit;text-decoration:none}
 
     /* Header */
-    nav{
-      width:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:space-between;
-      padding:8px 16px;position:sticky;top:0;z-index:10
-    }
+    nav{width:100%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:8px 16px;position:sticky;top:0;z-index:10}
     .nav-left{display:flex;align-items:center;gap:10px}
     .nav-left img{width:34px;height:34px;object-fit:contain;cursor:pointer}
     .nav-links{display:flex;gap:12px}
-    .nav-links a{color:#fff;text-decoration:none;font-weight:600;opacity:.95}
+    .nav-links a{color:#fff;font-weight:600;opacity:.95}
     .nav-links a:hover{opacity:1}
     .nav-right{display:flex;align-items:center;gap:10px}
-    .nav-right input[type="search"]{display:none}
     .nav-right .icon-btn{background:#fff;border:none;color:var(--accent);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600}
-    .nav-right i{font-size:1.1rem;cursor:pointer}
 
     .container{max-width:1100px;margin:24px auto;padding:0 16px}
+    .grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
+    @media (max-width: 940px){ .grid{grid-template-columns:1fr} }
 
-    /* Card layout */
-    .grid{
-      display:grid;grid-template-columns: 360px 1fr;gap:24px;
-    }
-    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+    .cardbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .h1{font-size:1.6rem;margin:0 0 8px}
+    .sub{color:var(--muted);font-size:.95rem}
 
-    .cardpanel{
-      background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;
-    }
-    .card-img-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
-    .card-img{width:100%;max-width:340px;border-radius:10px;border:1px solid var(--line)}
-    .img-controls{display:flex;gap:10px}
-    .btn{background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .imgwrap{display:flex;flex-direction:column;gap:10px;align-items:center}
+    .imgwrap img{width:100%;max-width:360px;border-radius:12px;border:1px solid var(--line);background:#000}
+    .btn{background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer;white-space:nowrap}
     .btn:hover{border-color:var(--muted)}
+    .btn.accent{background:var(--accent);border-color:transparent;color:#fff}
+    .btn.accent:hover{background:var(--accent-press)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
 
-    .title{margin:0 0 6px 0;font-size:1.5rem;font-weight:700}
-    .subtle{color:var(--muted)}
-    .price{font-size:1.25rem;font-weight:700;margin:10px 0}
-    .stock{margin:6px 0}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .qty{width:80px;padding:8px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--text)}
-    .cta{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+    .meta{display:grid;grid-template-columns:1fr;gap:12px}
+    .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .box h3{margin:.2rem 0 .6rem;font-size:1.05rem}
+    .kv{display:grid;grid-template-columns:160px 1fr;gap:6px 12px}
+    .kv div.label{color:var(--muted)}
+    .ruletext{white-space:pre-line}
 
-    .rulebox{white-space:pre-wrap;line-height:1.35;border:1px dashed var(--line);border-radius:12px;padding:12px;background:var(--card)}
-    .section{margin-top:22px}
-    h2{font-size:1.1rem;margin:0 0 10px 0}
+    .variants li{margin:6px 0}
+    .muted{color:var(--muted)}
 
-    .variants{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    .variants table{width:100%;border-collapse:collapse}
-    .variants th, .variants td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:.95rem}
-    .variants th{color:var(--muted);font-weight:600}
-    .variants a{text-decoration:none}
-    .badge{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:var(--chip);font-size:.8rem}
-
-    .crumbs{font-size:.9rem;margin-bottom:8px}
+    .err{padding:16px;background:#fff3f3;border:1px solid #ffd0d0;color:#b30000;border-radius:10px}
+    .info{padding:12px;background:var(--chip);border:1px dashed var(--line);border-radius:10px;color:var(--muted)}
   </style>
 </head>
 <body>
   <nav>
     <div class="nav-left">
-      <a href="index.html" title="Home">
-        <img src="Deckden Transparent.png" alt="DeckDen logo">
-      </a>
+      <a href="index.html" title="Home"><img src="Deckden Transparent.png" alt="DeckDen logo"></a>
       <div class="nav-links">
         <a href="magic-sets.html">Magic Sets</a>
-        <a href="#">Cart</a>
-        <a href="#">About Us</a>
+        <a href="set.html">Set</a>
       </div>
     </div>
     <div class="nav-right">
-      <input id="qsHeader" type="search" placeholder="Search…"/>
-      <i class="fas fa-user" title="Account"></i>
       <button class="icon-btn" onclick="toggleDarkMode()" title="Dark mode">🌙</button>
     </div>
   </nav>
 
   <div class="container">
-    <div class="crumbs"><a href="magic-sets.html">Sets</a> · <a id="setLink" href="#">Back to set</a></div>
+    <div id="error" class="err" style="display:none"></div>
 
     <div class="grid">
-      <!-- Left: image & flip -->
-      <div class="cardpanel">
-        <div class="card-img-wrap">
-          <img id="cardImg" class="card-img" alt="Card image"/>
-          <div class="img-controls">
-            <button id="flipBtn" class="btn" style="display:none">Flip</button>
-            <a id="scryLink" class="btn" target="_blank" rel="noopener">View on Scryfall</a>
+      <!-- Left: Image + controls -->
+      <div class="cardbox">
+        <div class="imgwrap">
+          <img id="cardImg" alt="Card image" src="" style="display:none"/>
+          <div class="row">
+            <button id="flipBtn" class="btn" style="display:none"><i class="fa-solid fa-retweet"></i> Flip</button>
+            <a id="scryfallLink" class="btn" target="_blank" rel="noopener">Open on Scryfall</a>
           </div>
         </div>
       </div>
 
-      <!-- Right: info & buy -->
-      <div>
-        <h1 id="cardTitle" class="title">Loading…</h1>
-        <div class="subtle" id="cardMeta"></div>
-        <div class="price" id="cardPrice"></div>
-        <div class="stock" id="cardStock"></div>
-        <div class="row">
-          <input id="qty" class="qty" type="number" min="1" value="1"/>
-          <button class="cta" onclick="addToCart()">Add to Cart</button>
+      <!-- Right: Details -->
+      <div class="meta">
+        <div class="box">
+          <h1 id="title" class="h1">Loading…</h1>
+          <div class="sub" id="subtitle"></div>
+          <div class="kv" style="margin-top:10px">
+            <div class="label">Price (AUD)</div><div id="price">—</div>
+            <div class="label">Stock</div><div id="stock">—</div>
+            <div class="label">Variant</div><div id="variant">—</div>
+            <div class="label">Finish</div><div id="finish">—</div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn accent" id="addBtn"><i class="fa-solid fa-cart-plus"></i> Add to cart</button>
+          </div>
         </div>
 
-        <div class="section">
-          <h2>Rules Text</h2>
-          <div id="rules" class="rulebox">Loading text…</div>
+        <div class="box">
+          <h3>Rules Text</h3>
+          <div id="rules" class="ruletext muted">—</div>
+        </div>
+
+        <div class="box">
+          <h3>Other variants in stock</h3>
+          <ul id="variantsList" class="variants"></ul>
+          <div id="noVariants" class="muted">None in stock.</div>
         </div>
       </div>
     </div>
 
-    <!-- Other in-stock variants (no images) -->
-    <div class="section variants">
-      <h2 style="padding:12px">Other Variants in Stock</h2>
-      <table id="variantsTable" aria-label="Other variants">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Finish</th>
-            <th>Variant</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="variantsBody">
-          <tr><td colspan="6" style="color:var(--muted);padding:14px">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div id="tips" class="info" style="display:none;margin-top:16px"></div>
   </div>
 
   <script>
-    /* ---------- CONFIG ---------- */
+    // -------- Config
     const CARDS_API_BASE = "https://script.google.com/macros/s/AKfycbyakGYRw-vHJKd4RkkoBwVCyjxVHSMomxHWcXDl-mahuKFoPrpt6YJS0xBl1Cn47hGm/exec";
-    // set.html should link here as: card.html?code=FIN&number=317&name=Sephiroth%2C%20Fabled%20SOLDIER
-    // We will:
-    // 1) pull the specific print from Scryfall (by set + collector number OR by exact name within set)
-    // 2) load all rows for that set from Sheets (?cards=1&set=FIN)
-    // 3) find the matching row (finish/variant) for price + stock
-    // 4) list other in-stock rows for the same card name
 
-    /* ---------- THEME ---------- */
+    // -------- Theme
     function toggleDarkMode(){ document.body.classList.toggle('dark-mode'); }
 
-    /* ---------- HELPERS ---------- */
-    function qsel(s){ return document.querySelector(s); }
-    function money(n){ return n>0 ? `$${Number(n).toFixed(2)}` : ""; }
-    function up(s){ return (s||"").toString().toUpperCase(); }
+    // -------- Helpers
+    function qs(name){ return new URLSearchParams(location.search).get(name); }
+    function normalizeNum(s){
+      // Collector numbers can be like "317a", "382", "527★"; normalize for compare
+      return String(s||"").trim().toLowerCase().replace(/\s+/g,'');
+    }
+    function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
 
-    function buildSetLink(code){
-      const url = new URL('set.html', location.href);
-      url.searchParams.set('code', code);
-      return url.toString();
+    function showError(msg, tips){
+      const e = document.getElementById('error');
+      e.style.display = 'block';
+      e.textContent = msg;
+      if(tips){
+        const t = document.getElementById('tips');
+        t.style.display = 'block';
+        t.innerHTML = tips;
+      }
     }
 
-    function variantKey(row){
-      const name = (row["Card Name"] || row.name || "").trim().toLowerCase();
-      const num  = String(row["Collector No"] || row.number || "").trim().toLowerCase();
-      const fin  = (row["Finish"] || row.finish || "").trim().toLowerCase();
-      const varLabel = (row["Variant"] || row.variant || "Standard").trim().toLowerCase();
-      return [name,num,fin,varLabel].join("|");
-    }
+    function pickBestMatch(rows, params){
+      const wantNum = normalizeNum(params.number);
+      const wantName = (params.name||"").trim().toLowerCase();
+      const wantFinish = (params.finish||"").trim().toLowerCase();   // "foil", "non-foil", "etched"
+      const wantVariant = (params.variant||"").trim();               // "Borderless", etc. (case-sensitive in sheet)
 
-    function rowToObj(row){
-      // Uses the columns from your sheet script
-      const obj = {
-        name: row["Card Name"] || "",
-        set: row["Set Code"] || "",
-        setName: row["Set Name"] || "",
-        number: String(row["Collector No"] || "").trim(),
-        type: row["Type Line"] || "",
-        colourId: row["Color Identity"] || "",
-        rarity: row["Rarity"] || "",
-        finish: (row["Finish"] || "").toString().toLowerCase(),
-        variant: row["Variant"] || "Standard",
-        usd: parseFloat(row["Scryfall USD"] || "0") || 0,
-        price: parseFloat(row["Sell Price (AUD, +10%)"] || row["Market AUD"] || "0") || 0,
-        stock: parseInt(row["Qty Owned"] || "0",10) || 0,
-        scryId: row["Scryfall ID"] || "",
-        sku: row["SKU"] || ""
-      };
-      return obj;
-    }
+      let candidates = rows;
 
-    async function fetchSetRows(setCode){
-      const url = `${CARDS_API_BASE}?cards=1&set=${encodeURIComponent(setCode)}`;
-      const res = await fetch(url);
-      if(!res.ok) throw new Error("Failed loading set rows");
-      const j = await res.json();
-      const rows = Array.isArray(j) ? j : (j.rows || j.data || []);
-      return rows.map(rowToObj);
-    }
-
-    async function fetchScryfallCard(setCode, number, name){
-      let url;
-      if(number){
-        url = `https://api.scryfall.com/cards/search?q=set:${encodeURIComponent(setCode)}+cn:${encodeURIComponent(number)}&unique=prints&order=set`;
+      // Narrow by number OR name (prefer number if provided)
+      if(wantNum){
+        candidates = candidates.filter(r => normalizeNum(r.number) === wantNum);
+      }else if(wantName){
+        candidates = candidates.filter(r => String(r.name||"").toLowerCase() === wantName);
       }else{
-        // exact name within set (quotes to prefer exact match)
-        url = `https://api.scryfall.com/cards/search?q=set:${encodeURIComponent(setCode)}+!"${encodeURIComponent(name)}"&unique=prints&order=set`;
+        return null; // nothing to match on
       }
-      const res = await fetch(url);
-      if(!res.ok) throw new Error(`Scryfall HTTP ${res.status}`);
-      const j = await res.json();
-      if(!j.data || !j.data.length) throw new Error("Card not found on Scryfall");
-      // pick the first print (or the one that matches finish/variant later)
-      return j.data[0];
+
+      // Optional disambiguation
+      if(wantVariant) candidates = candidates.filter(r => r.variant === wantVariant);
+      if(wantFinish)  candidates = candidates.filter(r => r.finish === wantFinish);
+
+      if(candidates.length === 0) return null;
+
+      // Prefer one with stock > 0; otherwise first
+      const withStock = candidates.find(r => (r.stock || 0) > 0);
+      return withStock || candidates[0];
     }
 
-    function setupImageFlip(card){
-      const imgEl = qsel("#cardImg");
-      const flipBtn = qsel("#flipBtn");
+    async function fetchSetRows(code){
+      const url = `${CARDS_API_BASE}?cards=1&set=${encodeURIComponent(code)}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const rows = Array.isArray(json) ? json : (json.rows || json.data || []);
 
-      let faceIndex = 0;
-      let faces = [];
-
-      if(card.image_uris){
-        faces = [card.image_uris.normal];
-      }else if(card.card_faces && card.card_faces.length){
-        faces = card.card_faces.map(f => f.image_uris && (f.image_uris.normal || f.image_uris.large)).filter(Boolean);
-      }
-      if(!faces.length) return;
-
-      imgEl.src = faces[0];
-      if(faces.length > 1){
-        flipBtn.style.display = "inline-block";
-        flipBtn.onclick = () => {
-          faceIndex = (faceIndex + 1) % faces.length;
-          imgEl.src = faces[faceIndex];
+      // Normalize to the fields we need
+      return rows.map(r=>{
+        return {
+          name: r["Card Name"] || r.name || "",
+          setName: r["Set Name"] || r.set_name || "",
+          code: (r["Set Code"] || r.set || "").toString().toLowerCase(),
+          number: r["Collector No"] || r["Collector Number"] || r.number || "",
+          type: r["Type Line"] || r.type || "",
+          variant: r["Variant"] || r.variant || "Standard",
+          finish: (r["Finish"] || r.finish || "").toString().toLowerCase(), // foil/non-foil/etched
+          price: parseFloat(r["Sell Price (AUD, +10%)"] || r.price || "0") || 0,
+          stock: parseInt(r["Qty Owned"] || r.stock || "0",10) || 0
         };
-      }else{
-        flipBtn.style.display = "none";
+      });
+    }
+
+    async function fetchScryfall(setCode, collectorNo, cardName){
+      // Try direct endpoint first
+      async function tryDirect(){
+        const url = `https://api.scryfall.com/cards/${encodeURIComponent(setCode)}/${encodeURIComponent(collectorNo)}`;
+        const res = await fetch(url);
+        if(res.ok) return res.json();
+        throw new Error(`Scryfall ${res.status}`);
       }
-    }
-
-    function oracleTextFrom(card){
-      if(card.oracle_text) return card.oracle_text;
-      if(card.card_faces && card.card_faces.length){
-        return card.card_faces.map(f => `• ${f.name}\n${f.type_line}\n${f.oracle_text || ""}`).join("\n\n");
+      // Fallback: search by set+name (less precise, but helpful)
+      async function trySearch(){
+        const q = `!"${cardName}" set:${setCode}`;
+        const url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}&unique=prints`;
+        const res = await fetch(url);
+        if(!res.ok) throw new Error(`Scryfall search ${res.status}`);
+        const data = await res.json();
+        return (data.data && data.data.length) ? data.data[0] : null;
       }
-      return "(No rules text available)";
-    }
-
-    function linkToSelf(params){
-      const url = new URL(location.href);
-      url.search = ""; // reset
-      for(const [k,v] of Object.entries(params)) if(v!=null && v!=="") url.searchParams.set(k, v);
-      return url.toString();
-    }
-
-    function addToCart(){
-      // placeholder hook
-      const qty = parseInt(qsel("#qty").value,10)||1;
-      alert(`Added ${qty} to cart (placeholder).`);
-    }
-
-    /* ---------- INIT ---------- */
-    (async function init(){
-      const p = new URLSearchParams(location.search);
-      const setCode = (p.get("code")||"").trim().toLowerCase();
-      const number  = (p.get("number")||"").trim();
-      const nameQP  = p.get("name") ? decodeURIComponent(p.get("name")) : "";
-
-      if(!setCode){
-        qsel(".container").innerHTML = "<p>Missing ?code=SETCODE</p>";
-        return;
-      }
-      qsel("#setLink").href = buildSetLink(setCode);
 
       try{
-        // load sheets rows and scryfall card
-        const [rows, card] = await Promise.all([
-          fetchSetRows(setCode),
-          fetchScryfallCard(setCode, number, nameQP)
-        ]);
-
-        // Pick the primary row: try matching collector#, then (name + optional finish/variant)
-        const finishQP  = (p.get("finish")||"").toLowerCase();
-        const variantQP = (p.get("variant")||"");
-        let primary = null;
-
-        if(number){
-          primary = rows.find(r => up(r.number) === up(number)) || null;
+        return await tryDirect();
+      }catch(_){
+        if(cardName){
+          try{ return await trySearch(); }catch(e2){ return null; }
         }
-        if(!primary && nameQP){
-          const nameMatches = rows.filter(r => r.name.toLowerCase() === nameQP.toLowerCase());
-          if(finishQP){
-            primary = nameMatches.find(r => r.finish.toLowerCase() === finishQP) || nameMatches[0] || null;
-          }else if(variantQP){
-            primary = nameMatches.find(r => r.variant.toLowerCase() === variantQP.toLowerCase()) || nameMatches[0] || null;
-          }else{
-            primary = nameMatches[0] || null;
-          }
+        return null;
+      }
+    }
+
+    function extractImagesAndRules(cardJson){
+      if(!cardJson) return { faces: [], scryUrl: "" };
+
+      const faces = [];
+      if(Array.isArray(cardJson.card_faces) && cardJson.card_faces.length){
+        for(const f of cardJson.card_faces){
+          faces.push({
+            img: f.image_uris ? (f.image_uris.normal || f.image_uris.large || f.image_uris.small) : "",
+            rules: f.oracle_text || ""
+          });
         }
-        // Fallback: try match by Scryfall id if present
-        if(!primary && card && card.id){
-          primary = rows.find(r => r.scryId && r.scryId === card.id) || null;
+      }else{
+        faces.push({
+          img: cardJson.image_uris ? (cardJson.image_uris.normal || cardJson.image_uris.large || cardJson.image_uris.small) : "",
+          rules: cardJson.oracle_text || ""
+        });
+      }
+      const scryUrl = cardJson.scryfall_uri || cardJson.uri || "";
+      return { faces, scryUrl };
+    }
+
+    function renderPage(active, allRowsForName, scry){
+      // Title + subtitle
+      document.getElementById('title').textContent = active.name || "Card";
+      document.getElementById('subtitle').textContent =
+        `${(active.setName||"").trim()} • #${active.number} • ${active.variant} • ${cap(active.finish)}`;
+
+      // Price/stock
+      document.getElementById('price').textContent = active.price > 0 ? `$${Number(active.price).toFixed(0)}` : "—";
+      document.getElementById('stock').textContent = active.stock;
+      document.getElementById('variant').textContent = active.variant || "Standard";
+      document.getElementById('finish').textContent = cap(active.finish) || "—";
+
+      // Scryfall link
+      const sLink = document.getElementById('scryfallLink');
+      sLink.href = scry.scryUrl || `https://scryfall.com/search?q=${encodeURIComponent('!"'+active.name+'" set:'+active.code)}`;
+
+      // Image + rules + flip
+      const imgEl = document.getElementById('cardImg');
+      const rulesEl = document.getElementById('rules');
+      const flipBtn = document.getElementById('flipBtn');
+
+      if(scry.faces.length){
+        let idx = 0;
+        function paint(){
+          const f = scry.faces[idx];
+          if(f.img){ imgEl.src = f.img; imgEl.style.display = 'block'; }
+          else { imgEl.style.display = 'none'; }
+          rulesEl.textContent = f.rules || "—";
         }
+        paint();
 
-        // Render header/meta
-        const displayName = primary?.name || card.name || nameQP || "Card";
-        const setName = primary?.setName || card.set_name || setCode.toUpperCase();
-        const collNo = primary?.number || card.collector_number || number || "";
-
-        document.title = `${displayName} – DeckDen`;
-        qsel("#cardTitle").textContent = displayName;
-        qsel("#cardMeta").textContent = `${setName} • #${collNo} • ${primary?.finish ? (primary.finish.charAt(0).toUpperCase()+primary.finish.slice(1)) : ''} ${primary?.variant && primary.variant!=="Standard" ? "• " + primary.variant : ""}`.trim();
-
-        // Price / stock
-        const priceAUD = primary?.price || 0;
-        const stock = primary?.stock ?? 0;
-        qsel("#cardPrice").textContent = priceAUD ? money(priceAUD) : "";
-        qsel("#cardStock").innerHTML = stock>0 ? `<span class="badge">In stock: ${stock}</span>` : `<span class="badge">Out of stock</span>`;
-        qsel("#qty").max = Math.max(stock, 1);
-
-        // Images & rules
-        setupImageFlip(card);
-        qsel("#rules").textContent = oracleTextFrom(card);
-        qsel("#scryLink").href = card.scryfall_uri || card.uri || "#";
-
-        // Variants list (same name, different finish/variant), only in-stock
-        const sameName = (primary ? primary.name : (nameQP || card.name)).toLowerCase();
-        const variants = rows
-          .filter(r => r.name.toLowerCase() === sameName)
-          .filter(r => !(up(r.number) === up(collNo) && r.finish === primary?.finish && r.variant === primary?.variant))
-          .filter(r => (r.stock||0) > 0)
-          .sort((a,b)=> (a.price||0) - (b.price||0));
-
-        const vb = qsel("#variantsBody");
-        if(!variants.length){
-          vb.innerHTML = `<tr><td colspan="6" style="color:var(--muted);padding:14px">No other variants currently in stock.</td></tr>`;
+        if(scry.faces.length > 1){
+          flipBtn.style.display = 'inline-flex';
+          flipBtn.onclick = ()=>{ idx = (idx+1) % scry.faces.length; paint(); };
         }else{
-          vb.innerHTML = variants.map(r=>{
-            const link = linkToSelf({ code:setCode, number:r.number, name:encodeURIComponent(r.name), finish:r.finish, variant:r.variant });
-            return `<tr>
-              <td>${r.number}</td>
-              <td>${r.finish ? r.finish.charAt(0).toUpperCase()+r.finish.slice(1) : ''}</td>
-              <td>${r.variant}</td>
-              <td>${money(r.price)}</td>
-              <td>${r.stock}</td>
-              <td><a href="${link}">View</a></td>
-            </tr>`;
-          }).join("");
+          flipBtn.style.display = 'none';
         }
+      }else{
+        imgEl.style.display = 'none';
+        rulesEl.textContent = "—";
+        flipBtn.style.display = 'none';
+      }
+
+      // Other variants (in stock) for same name
+      const ul = document.getElementById('variantsList');
+      const none = document.getElementById('noVariants');
+      const others = allRowsForName
+        .filter(r => (r.finish !== active.finish || r.variant !== active.variant || r.number !== active.number))
+        .filter(r => r.stock > 0);
+
+      if(!others.length){
+        ul.innerHTML = "";
+        none.style.display = 'block';
+      }else{
+        none.style.display = 'none';
+        ul.innerHTML = others.map(r => {
+          const url = `card.html?code=${encodeURIComponent(r.code)}&number=${encodeURIComponent(r.number)}&name=${encodeURIComponent(r.name)}&variant=${encodeURIComponent(r.variant)}&finish=${encodeURIComponent(r.finish)}`;
+          return `<li><a href="${url}">${r.name}</a> — #${r.number} • ${r.variant} • ${cap(r.finish)} • $${Number(r.price).toFixed(0)} (${r.stock} in stock)</li>`;
+        }).join('');
+      }
+
+      // Add-to-cart placeholder
+      document.getElementById('addBtn').onclick = ()=>{
+        alert(`Added to cart:\n${active.name} #${active.number}\n${active.variant} • ${cap(active.finish)} • $${Number(active.price).toFixed(0)}`);
+      };
+    }
+
+    async function init(){
+      // Params
+      const code = (qs('code')||'').trim().toLowerCase();
+      const number = qs('number'); // may be null
+      const name = qs('name');     // may be null
+      const variant = qs('variant');
+      const finish = qs('finish');
+
+      if(!code){
+        showError("Missing set code (?code=).", `Example: <code>card.html?code=fin&number=317</code>`);
+        return;
+      }
+      if(!number && !name){
+        showError("Missing identifier. Provide either ?number= or ?name=.", `Examples:<br>
+          <code>card.html?code=${code}&number=317</code><br>
+          <code>card.html?code=${code}&name=Sephiroth, Fabled Soldier</code>`);
+        return;
+      }
+
+      try{
+        // Load all rows for the set
+        const rows = await fetchSetRows(code);
+        // Find active row
+        const active = pickBestMatch(rows, { number, name, variant, finish });
+        if(!active){
+          showError("Failed to load this card. Check the URL parameters (code, number/name).",
+            `Tip: Open <a target="_blank" rel="noopener" href="set.html?code=${encodeURIComponent(code)}">the set list</a> and click the card again.`
+          );
+          return;
+        }
+
+        // Fetch Scryfall art/rules
+        const scryJson = await fetchScryfall(code, active.number, active.name);
+        const scry = extractImagesAndRules(scryJson);
+
+        // Render
+        const rowsSameName = rows.filter(r => String(r.name||"").toLowerCase() === String(active.name||"").toLowerCase());
+        renderPage(active, rowsSameName, scry);
 
       }catch(err){
         console.error(err);
-        qsel(".container").innerHTML = `<p style="color:var(--muted)">Failed to load this card. Check the URL parameters (code, number/name).</p>`;
+        showError("Unexpected error loading this card.",
+          `Please try reloading. If it persists, verify your Apps Script web app URL in <code>CARDS_API_BASE</code>.`);
       }
-    })();
+    }
+
+    init();
   </script>
 </body>
 </html>
